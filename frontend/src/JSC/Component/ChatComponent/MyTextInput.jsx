@@ -1,12 +1,10 @@
-import React, {memo, useState} from 'react';
+import React, { memo, useState } from 'react';
 import styled from "styled-components";
 import voicetalk from "../../icon/voicetalk.svg";
-import {chatAddMessage} from "../../Common/chat"
-import {SEND_MESSAGE, socketApi} from "../../Common/socketApi";
+import { chatAddMessage } from "../../Common/Chat/addMessage"
 
-const Img = styled.img`
-  
-`;
+// import { SEND_MESSAGE, socketApi } from "../../Common/socketModule";
+
 const SendChat = styled.div`
    border-top: 3px solid #ececec;
    height:75px;
@@ -19,11 +17,11 @@ const FieldSet = styled.div`
     flex-direction: row;
 `;
 
-const FieldInput = styled.input`{
+const FieldInput = styled.input`
     width:100%;
     height:30px;
     border:3px solid #ececec; /* <input> 태그 테두리 삭제*/
-    border-radius: 30px;
+    border-radius:30px;
     margin:5px 10px 5px 10px;
 `;
 
@@ -35,15 +33,14 @@ const FieldSetBtn = styled.button`
     width:60px;
     height:25px;
     overflow:hidden;
-    // background-color:rgb(255, 235, 51); // 카카오톡 버튼 색
-    background-color: ${props => props.disabled === false ? "rgb(208,208,208)" : "rgb(150,150,150)"}
+    background-color: ${props => props.disabled === false ? "rgb(208,208,208)" : "rgb(150,150,150)"};
     color:white;
     border:none;
     border-radius: 30px;
     box-shadow: 0.2px 0.2px 0.1px 0.1px rgba(163, 167, 162, 0.774); /*그림자 만들기*/
-    cursor:pointer;
-    
+    cursor:pointer;    
 `;
+
 
 const SendMenuButtons = styled.div`
     display:flex;
@@ -61,13 +58,12 @@ const SendMenuButton = styled.button`
 `;
 
 
-const sendMediaButtonList = [voicetalk];
 const makeSendMediaButton = (mediaBtn) => {
     return (
         <SendMenuButtons className="sendMenuBtn">
             {
                 mediaBtn.map((i, index) =>
-                    <SendMenuButton key={mediaBtn[index]}><img src={i}/></SendMenuButton>
+                    <SendMenuButton key={mediaBtn[index]}><img src={i} /></SendMenuButton>
                 )
             }
         </SendMenuButtons>
@@ -75,11 +71,8 @@ const makeSendMediaButton = (mediaBtn) => {
 };
 
 
-const MyTextInput = ({chatList, setChatList, nickname, socketRef, ...props}) => {
+const MyTextInput = ({ chatList, setChatList, myNickname, socketRef, peers }) => {
     const [inputMessage, setInputMessage] = useState("");
-
-
-
     const InputMessageChangeHandler = (e) => {
         e.preventDefault();
         inputMessage.length > 30 || setInputMessage(e.target.value); // 30글자 제한해야함.
@@ -87,21 +80,33 @@ const MyTextInput = ({chatList, setChatList, nickname, socketRef, ...props}) => 
 
     const fieldSetButtonHandler = (e) => { // 텍스트가 들어있으면 버튼이 활성화 핸들러
         e.preventDefault();
-        chatAddMessage({nickname, inputMessage, chatList, setChatList});
-        socketApi(SEND_MESSAGE, {socketRef, nickname, message:inputMessage});
-        setInputMessage("");
+        const js = JSON.stringify({ nickname: myNickname, inputMessage })
+        try { // 
+            console.log("[debug] : " + peers);
+
+            peers === undefined || peers.forEach(p => {
+                console.log(myNickname, inputMessage, p)
+                p.send(js);
+            });
+            chatAddMessage({ nickname: myNickname, inputMessage, chatList, setChatList });
+        } catch (e) {
+            console.error(e.name + ': ' + e.message)
+        }
+        finally {
+            setInputMessage("");
+        }
     };
 
     return (
         <SendChat className="sendChat">
             <form className="sendForm" name="chat">
                 <FieldSet className="fieldSet">
-                    <FieldInput value={inputMessage} onChange={InputMessageChangeHandler} className="fieldInput"/>
+                    <FieldInput value={inputMessage} onChange={InputMessageChangeHandler} className="fieldInput" />
                     <FieldSetBtn disabled={!inputMessage} onClick={fieldSetButtonHandler} type='submit'
-                                 className="fieldSetBtn">전송</FieldSetBtn>
+                        className="fieldSetBtn">전송</FieldSetBtn>
                 </FieldSet>
                 <div>
-                    {makeSendMediaButton(sendMediaButtonList)}
+                    {makeSendMediaButton([voicetalk])}
                 </div>
             </form>
         </SendChat>

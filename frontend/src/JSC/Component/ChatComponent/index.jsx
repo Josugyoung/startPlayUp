@@ -1,12 +1,13 @@
-import React, {memo, useContext, useEffect, useRef, useState} from 'react';
+import React, { memo, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components'
 import Message from './Message'
 import MyTextInput from "./MyTextInput";
 import Nav from "./Nav";
-import {UserContext} from "../../store";
+import { testChatList, UserContext } from "../../store";
 import io from "socket.io-client";
-import {chatAddMessage} from "../../Common/chat"
-import {RECEIVE_MESSAGE, socketApi} from "../../Common/socketApi";
+import { chatAddMessage } from "../../Common/Chat/addMessage"
+import { connectPeer } from "../../Common/peerModule"
+// import { RECEIVE_MESSAGE, socketApi } from "../../Common/socketModule";
 import SideVoiceUser from "./SideVoiceUser";
 
 const TextField = styled.div`
@@ -19,12 +20,12 @@ const TextField = styled.div`
   width:inherit;
   border-right:3px solid #ececec;
   background-color: white;
+  flex-grow:1;
   
   &::-webkit-scrollbar{
     width: 100%;
     background-color: black;
   }
-  
 `;
 
 const Chat = styled.div`
@@ -43,50 +44,65 @@ const TextFieldWithVoiceUsers = styled.div`
       flex-direction: row;
 `;
 
-// const currentSocket = io.connect("/");
-
-function Index({backgroundColor, height, width, ...props}) {
+function Index({ backgroundColor, height, width, ...props }) {
+    // socket io.connect
     const socketRef = useRef();
-    const {user, isAuthenticated, dispatch} = useContext(UserContext);
+
+
+    const { user, isAuthenticated } = useContext(UserContext);
+    // chat nickname
     const myNickName = user;
-    console.log("[debug] : ", user, isAuthenticated);
+    // chat state for rerendering
     const [chatList, setChatList] = useState([]);
+    let chatListRef = useRef([...chatList]);
+    // scroll ref;
     const scrollRef = useRef(null);
+
+
+    // peer state for rerendering
+    const [peers, setPeers] = useState([]);
+    let peersRef = useRef([]);
+    const roomID = "9a06eb80-9fd4-11eb-a3e2-377a237cffe7";
+
     const scrollToBottom = () => {
-        const {scrollHeight, clientHeight} = scrollRef.current;
+        const { scrollHeight, clientHeight } = scrollRef.current;
         scrollRef.current.scrollTop = scrollHeight - clientHeight;
     };
-    useEffect(()=>{
+
+    useEffect(() => {
         socketRef.current = io.connect("/");
-    },[]);
+        connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user });
+
+        return () => peersRef.current.forEach(i => {
+            console.log("destroy peer", i);
+            i.peer.removeAllListeners();
+            i.peer.destroy();
+        })
+    }, []);
+
 
     useEffect(() => {
-        socketApi(RECEIVE_MESSAGE, {socketRef, chatList, setChatList}, chatAddMessage);
-        return () => socketApi(RECEIVE_MESSAGE, {socketRef, socketOnOff: false});
-    }, [chatList]);
-
-
-    useEffect(() => {
-        console.log(chatList);
         scrollToBottom();
+        chatListRef.current = [...chatList];
     }, [chatList]);
+
     return (
         <Chat width={height} height={width}>
 
-            <Nav/>
+            <Nav />
             <TextFieldWithVoiceUsers>
                 <TextField className="textField" ref={scrollRef}>
                     {chatList.map((i, index) => <Message key={"chat" + index}
-                                                         who={i.nickname === myNickName ? "me" : "another"}
-                                                         chatObject={i} chatList={chatList}/>)}
+                        who={i.nickname === myNickName ? "me" : "another"}
+                        chatObject={i} chatList={chatList} />)}
                 </TextField>
-                <SideVoiceUser socketRef={socketRef}/>
+                <SideVoiceUser peersRef={peersRef} peers={peers} chatList={chatList} setChatList={setChatList} />
             </TextFieldWithVoiceUsers>
-            <MyTextInput nickname={myNickName} chatList={chatList} setChatList={setChatList}
-                         socketRef={socketRef}/>
+            <MyTextInput peers={peers} myNickname={myNickName} chatList={chatList} setChatList={setChatList}
+                socketRef={socketRef} />
 
         </Chat>
     );
 }
 
-export default memo(Index);
+export default Index;

@@ -1,6 +1,5 @@
-import ChatComponent from '../Component/ChatComponent'
-import React, {memo} from "react";
-import styled, {createGlobalStyle} from "styled-components";
+import React, { memo } from "react";
+import { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 import thunderstorm from "../image/thunderstorm.jpg";
 
@@ -22,25 +21,12 @@ const GlobalStyles = createGlobalStyle`
      }
  `;
 
-const Main = styled.div`
-  width:100%;
-  height:100%;
-  display: flex;
-  justify-content: space-between;
-`;
-
-const ChatComponentWithStyled = styled(ChatComponent)`
-  display:flex;
-  justify-items: flex-end;
-`;
-
 
 function ChatContainer() {
-    console.log("debug ChatContainer rerender");
-    // const {user, isAuthenticated, dispatch} = useContext(UserContext);
-    return (
-        <GlobalStyles image={thunderstorm}/>
-    );
+  console.log("debug ChatContainer rerender");
+  return (
+    <GlobalStyles image={thunderstorm} />
+  );
 }
 
-export default memo(ChatContainer);
+export default ChatContainer;

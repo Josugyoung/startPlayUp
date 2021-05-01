@@ -1,5 +1,5 @@
-import React,{useEffect,useRef,useState,memo} from 'react';
-import styled, {css} from 'styled-components'
+import React, { memo } from 'react';
+import styled, { css } from 'styled-components'
 
 const MessageContainer = styled.div`
   display:flex;
@@ -69,18 +69,18 @@ const Message = styled.span`
 `;
 
 
-function App({chatObject, who}) {
-    return (
-        <>
-            <MessageContainer who={who}>
-                <Messages className="text" who={who}>
-                    {who==="me" || <NickName className="nickName">{chatObject.nickname}</NickName>}
-                    {chatObject.textList.map((i, index) => <Message who={who} key={(chatObject + index)}>{i}</Message>)}
-                    <Time>{chatObject.chatTime.toString().slice(4, 25)}</Time>
-                </Messages>
-            </MessageContainer>
-        </>
-    );
+function App({ chatObject, who }) {
+  return (
+    <>
+      <MessageContainer who={who}>
+        <Messages className="text" who={who}>
+          {who === "me" || <NickName className="nickName">{chatObject.nickname}</NickName>}
+          {chatObject.textList.map((i, index) => <Message who={who} key={(chatObject + index)}>{i}</Message>)}
+          <Time>{chatObject.chatTime.toString().slice(4, 25)}</Time>
+        </Messages>
+      </MessageContainer>
+    </>
+  );
 }
 
 export default memo(App);

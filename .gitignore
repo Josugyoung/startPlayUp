@@ -24,7 +24,8 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 
 frontend/src/JSC/Common/firebase/config.js
-
+frontend/backup
 
 backend/node_modules
 backend/testf
+backend/testServerFile
