@@ -36,7 +36,7 @@ const StyledAudio = styled.audio`
 const App = ({ peersRef, peers, voiceRef }) => {
     return (
         <ConnectUsers>
-            {peers.map((i) => <Test key={i[0]}>{i[1]}{console.log("[debug] : " + i[1])}</Test>)}
+            {peers.map((i) => <Test key={i.peer}>{i.nickname}{console.log("[debug] : " + i.nickname)}</Test>)}
             {console.log(peers)}
         </ConnectUsers>
     )

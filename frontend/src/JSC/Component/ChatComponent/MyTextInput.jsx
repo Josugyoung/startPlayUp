@@ -86,7 +86,7 @@ const MyTextInput = ({ chatList, setChatList, myNickname, socketRef, peers }) =>
 
             peers === undefined || peers.forEach(p => {
                 console.log(myNickname, inputMessage, p)
-                p[0].send(js);
+                p.peer.send(js);
             });
             chatAddMessage({ nickname: myNickname, inputMessage, chatList, setChatList });
         } catch (e) {

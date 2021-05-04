@@ -49,7 +49,7 @@ const App = () => {
         const js = JSON.stringify({ type: "RockPaperScissors", nickname: user, data: tmp })
         try {
             peers === undefined || peers.forEach(p => {
-                p[0].send(js);
+                p.peer.send(js);
             });
             setSelectData(tmp)
         } catch (e) {

@@ -99,7 +99,7 @@ function Index({ backgroundColor, height, width, ...props }) {
     return (
         <Chat width={height} height={width}>
             {peers.map(i => (
-                <StyledAudio key={"" + i[0]._id + i[0].localAddress + i[0].localPort} playsInline autoPlay ref={voiceRef} />
+                <StyledAudio key={"" + i.peer._id + i.peer.localAddress + i.peer.localPort} playsInline autoPlay ref={voiceRef} />
             ))}
             <Nav />
             <TextFieldWithVoiceUsers>

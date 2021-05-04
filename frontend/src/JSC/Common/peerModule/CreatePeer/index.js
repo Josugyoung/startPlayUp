@@ -14,7 +14,7 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
                     peer,
                     nickname: "",
                 });
-                peers.push([peer, "연결중"]);
+                peers.push({ peer, nickname: "연결중" });
             });
             setPeers(peers);
         });
@@ -27,18 +27,14 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
                 nickname: peerNickname,
             })
             console.log("[debug : addPeer : ", peersRef.current);
-            // setPeers(users => {
-            //     console.log("users : ", users);
-            //     return [...users, [peer, peerNickname]]
-            // });
-            setPeers(peersRef.current.map((i) => [i.peer, i.nickname]));
+            setPeers(peersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
         });
 
         socketRef.current.on("receiving returned signal", ({ id, signal, peerNickname }) => {
             const item = peersRef.current.find(p => p.peerID === id);
             item.peer.signal(signal);
             item.nickname = peerNickname;
-            setPeers(peersRef.current.map((i) => [i.peer, i.nickname]));
+            setPeers(peersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
             console.log("receiving returned signal", peerNickname);
         });
 
@@ -47,7 +43,7 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
             console.log("disconnect user : ", peersRef.current);
             peersRef.current = peersRef.current.filter((i) => i.peerID !== socketID)
             console.log("disconnect user : ", peersRef.current);
-            setPeers(peersRef.current.map((i) => [i.peer, i.nickname]));
+            setPeers(peersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
         });
 
     }).catch((e) => console.log(e));
