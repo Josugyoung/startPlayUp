@@ -5,6 +5,8 @@ import { Route } from 'react-router-dom';
 import LoginPageContainer from "./Container/LoginPageContainer";
 import ChatContainer from "./Container/ChatContainer";
 import ChatComponent from "./Component/ChatComponent";
+import RockPaperScissors from "./Component/GameComponent/RockPaperScissors";
+import styled from 'styled-components'
 
 
 const initialState = {
@@ -39,10 +41,23 @@ export const UserContext = createContext({
     dispatch: () => { }
 });
 
+export const PeerDataContext = createContext({
+    peerData: "",
+    setpeerData: ""
+});
+
+export const PeersContext = createContext([]);
+
+const GamePage = styled.div`
+    display:flex;
+    flex-direction:row;
+`;
 
 function Store() {
     const [state, dispatch] = useReducer(reducer, initialState);
     const { user, isAuthenticated } = state;
+    const [peerData, setPeerData] = useState();
+    const [peers, setPeers] = useState([]);
     const value = useMemo(() => ({
         user: user,
         isAuthenticated: isAuthenticated,
@@ -52,10 +67,17 @@ function Store() {
 
     return (
         <UserContext.Provider value={value}>
-            <Route path="/" component={ChatContainer} />
-            <Route exact path="/login" component={LoginPageContainer} />
-            {isAuthenticated && <Route exact path="/chat" component={ChatComponent} />}
-        </UserContext.Provider>
+            <PeerDataContext.Provider value={{ peerData, setPeerData }}>
+                <PeersContext.Provider value={{ peers, setPeers }}>
+                    <Route path="/" component={ChatContainer} />
+                    <Route exact path="/" component={LoginPageContainer} />
+                    {isAuthenticated && <Route exact path="/chat" render={() => <GamePage>
+                        <RockPaperScissors />
+                        <ChatComponent />
+                    </GamePage>} />}
+                </PeersContext.Provider>
+            </PeerDataContext.Provider>
+        </UserContext.Provider >
     );
 }
 

@@ -18,29 +18,29 @@ const Test = styled.div`
 const StyledAudio = styled.audio`
     height: 40%;
     width: 50%;
+    display:none;
 `;
 
-const Audio = ({ peer }) => {
-    const ref = useRef();
-    useEffect(() => {
-        peer.on("stream", stream => {
-            ref.current.srcObject = stream;
-        });
-    }, []);
+// const Audio = ({ voiceRef }) => {
+//     // useEffect(() => {
+//     //     peer.on("stream", stream => {
+//     //         console.log("asdf")
+//     //         ref.current.srcObject = stream;
+//     //     });
+//     // }, []);
+//     return (
+//         <StyledAudio playsInline autoPlay ref={voiceRef} />
+//     );
+// }
 
-    return (
-        <StyledAudio playsInline autoPlay ref={ref} />
-    );
-}
-
-const App = ({ peersRef, peers, chatList, setChatList }) => {
+const App = ({ peersRef, peers, voiceRef }) => {
     return (
         <ConnectUsers>
             {peersRef.current.map((i) => <Test key={i.peerID}>{i.nickname}{console.log("[debug] : " + i.nickname)
             }</Test>)}
-            {peers.map((i, index) => (
-                <Audio key={"" + i._id + i.localAddress + i.localPort} peer={i} />
-            ))}
+            {/* {peers.map((i, index) => (
+                <Audio key={"" + i._id + i.localAddress + i.localPort} peer={i} voiceRef={voiceRef} />
+            ))} */}
             {console.log(peers)}
         </ConnectUsers>
     )

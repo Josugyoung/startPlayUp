@@ -80,7 +80,7 @@ const MyTextInput = ({ chatList, setChatList, myNickname, socketRef, peers }) =>
 
     const fieldSetButtonHandler = (e) => { // 텍스트가 들어있으면 버튼이 활성화 핸들러
         e.preventDefault();
-        const js = JSON.stringify({ nickname: myNickname, inputMessage })
+        const js = JSON.stringify({ type: "chat", nickname: myNickname, data: inputMessage })
         try { // 
             console.log("[debug] : " + peers);
 

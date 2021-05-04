@@ -3,10 +3,10 @@ import styled from 'styled-components'
 import Message from './Message'
 import MyTextInput from "./MyTextInput";
 import Nav from "./Nav";
-import { testChatList, UserContext } from "../../store";
+import { PeerDataContext, UserContext, PeersContext } from "../../store";
 import io from "socket.io-client";
 import { chatAddMessage } from "../../Common/Chat/addMessage"
-import { connectPeer } from "../../Common/peerModule"
+import { connectPeer } from "../../Common/peerModule/CreatePeer"
 // import { RECEIVE_MESSAGE, socketApi } from "../../Common/socketModule";
 import SideVoiceUser from "./SideVoiceUser";
 
@@ -44,12 +44,21 @@ const TextFieldWithVoiceUsers = styled.div`
       flex-direction: row;
 `;
 
+const StyledAudio = styled.video`
+    height: 40%;
+    width: 50%;
+    display:none;
+`;
+
+
 function Index({ backgroundColor, height, width, ...props }) {
     // socket io.connect
     const socketRef = useRef();
 
 
-    const { user, isAuthenticated } = useContext(UserContext);
+    const { user } = useContext(UserContext);
+    const { peerData, setPeerData } = useContext(PeerDataContext);
+    const { peers, setPeers } = useContext(PeersContext);
     // chat nickname
     const myNickName = user;
     // chat state for rerendering
@@ -58,9 +67,9 @@ function Index({ backgroundColor, height, width, ...props }) {
     // scroll ref;
     const scrollRef = useRef(null);
 
-
+    const voiceRef = useRef();
     // peer state for rerendering
-    const [peers, setPeers] = useState([]);
+    //const [peers, setPeers] = useState([]);
     let peersRef = useRef([]);
     const roomID = "9a06eb80-9fd4-11eb-a3e2-377a237cffe7";
 
@@ -71,7 +80,8 @@ function Index({ backgroundColor, height, width, ...props }) {
 
     useEffect(() => {
         socketRef.current = io.connect("/");
-        connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user });
+        console.log(setPeerData)
+        connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
 
         return () => peersRef.current.forEach(i => {
             console.log("destroy peer", i);
@@ -88,7 +98,9 @@ function Index({ backgroundColor, height, width, ...props }) {
 
     return (
         <Chat width={height} height={width}>
-
+            {peers.map(i => (
+                <StyledAudio key={"" + i._id + i.localAddress + i.localPort} playsInline autoPlay ref={voiceRef} />
+            ))}
             <Nav />
             <TextFieldWithVoiceUsers>
                 <TextField className="textField" ref={scrollRef}>

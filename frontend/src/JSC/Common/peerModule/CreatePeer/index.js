@@ -1,7 +1,7 @@
 import Peer from "simple-peer";
-import { chatAddMessageRef } from "../Chat/addMessage"
+import { chatAddMessageRef } from "../../Chat/addMessage"
 
-export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, chatListRef, setChatList, myNickname }) => {
+export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, chatListRef, setChatList, myNickname, peerData, setPeerData, voiceRef }) => {
     navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
         socketRef.current.emit("join room", roomID);
         socketRef.current.on("all users", users => {
@@ -60,11 +60,8 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
         peer.on("signal", signal => {
             socketRef.current.emit("sending signal", { userToSignal, callerID, signal, myNickname })
         })
-        peer.on('data', jsonData => {
-            const { nickname, inputMessage } = JSON.parse(jsonData)
-            console.log("[debug] peer.on ('data') : ", nickname, inputMessage, chatList);
-            chatAddMessageRef({ nickname, inputMessage, chatListRef, setChatList });
-        });
+        connectVoiceRef({ peer, voiceRef });
+        getDataFromPeerOn({ peer, chatListRef, setChatList, voiceRef, setPeerData });
         return peer;
     }
 
@@ -81,11 +78,36 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
         });
 
         peer.signal(incomingSignal);
-        peer.on('data', jsonData => {
-            const { nickname, inputMessage } = JSON.parse(jsonData)
-            console.log("[debug] peer.on ('data') : ", nickname, inputMessage, chatList);
-            chatAddMessageRef({ nickname, inputMessage, chatListRef, setChatList });
-        });
+        connectVoiceRef({ peer, voiceRef });
+        getDataFromPeerOn({ peer, chatListRef, setChatList, voiceRef, setPeerData });
         return peer;
     }
+
+    const getDataFromPeerOn = ({ peer, chatListRef, setChatList, voiceRef, setPeerData }) => {
+        peer.on('data', jsonData => {
+            const { type, nickname, data } = JSON.parse(jsonData)
+            switch (type) {
+                case "chat":
+                    chatAddMessageRef({ nickname, inputMessage: data, chatListRef, setChatList });
+                    break;
+                case "RockPaperScissors":
+                    setPeerData(data);
+                    break;
+                default:
+                    return;
+            }
+            connectVoiceRef({ peer, voiceRef });
+        });
+    }
+    const connectVoiceRef = ({ peer, voiceRef }) => {
+        peer.on("stream", stream => {
+            console.log("[debug] : voiceRef");
+            if ("srcObject" in voiceRef.current) {
+                console.log("voiceRef", voiceRef.current)
+                voiceRef.current.srcObject = stream;
+            }
+        });
+    }
 }
+
+
