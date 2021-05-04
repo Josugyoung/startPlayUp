@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import styled from "styled-components";
 import voicetalk from "../../icon/voicetalk.svg";
-import { chatAddMessage } from "../../Common/Chat/addMessage"
+import { chatAddMessage } from "../../Common/ChatModule/addMessage"
 
 // import { SEND_MESSAGE, socketApi } from "../../Common/socketModule";
 
@@ -86,7 +86,7 @@ const MyTextInput = ({ chatList, setChatList, myNickname, socketRef, peers }) =>
 
             peers === undefined || peers.forEach(p => {
                 console.log(myNickname, inputMessage, p)
-                p.send(js);
+                p[0].send(js);
             });
             chatAddMessage({ nickname: myNickname, inputMessage, chatList, setChatList });
         } catch (e) {

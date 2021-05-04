@@ -5,7 +5,7 @@ import MyTextInput from "./MyTextInput";
 import Nav from "./Nav";
 import { PeerDataContext, UserContext, PeersContext } from "../../store";
 import io from "socket.io-client";
-import { chatAddMessage } from "../../Common/Chat/addMessage"
+import { chatAddMessage } from "../../Common/ChatModule/addMessage"
 import { connectPeer } from "../../Common/peerModule/CreatePeer"
 // import { RECEIVE_MESSAGE, socketApi } from "../../Common/socketModule";
 import SideVoiceUser from "./SideVoiceUser";
@@ -83,11 +83,11 @@ function Index({ backgroundColor, height, width, ...props }) {
         console.log(setPeerData)
         connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
 
-        return () => peersRef.current.forEach(i => {
-            console.log("destroy peer", i);
-            i.peer.removeAllListeners();
-            i.peer.destroy();
-        })
+        // return () => peersRef.current.forEach(i => {
+        //     console.log("destroy peer", i);
+        //     // i.peer.removeAllListeners();
+        //     // i.peer.destroy();
+        // })
     }, []);
 
 
@@ -99,7 +99,7 @@ function Index({ backgroundColor, height, width, ...props }) {
     return (
         <Chat width={height} height={width}>
             {peers.map(i => (
-                <StyledAudio key={"" + i._id + i.localAddress + i.localPort} playsInline autoPlay ref={voiceRef} />
+                <StyledAudio key={"" + i[0]._id + i[0].localAddress + i[0].localPort} playsInline autoPlay ref={voiceRef} />
             ))}
             <Nav />
             <TextFieldWithVoiceUsers>
@@ -117,4 +117,4 @@ function Index({ backgroundColor, height, width, ...props }) {
     );
 }
 
-export default Index;
+export default memo(Index);

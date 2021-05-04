@@ -33,7 +33,7 @@ const App = () => {
     const { user } = useContext(UserContext);
     const [selectData, setSelectData] = useState("");
     const { peers } = useContext(PeersContext);
-    
+
 
     const selectDataHandler = (data) => {
         let tmp;
@@ -49,7 +49,7 @@ const App = () => {
         const js = JSON.stringify({ type: "RockPaperScissors", nickname: user, data: tmp })
         try {
             peers === undefined || peers.forEach(p => {
-                p.send(js);
+                p[0].send(js);
             });
             setSelectData(tmp)
         } catch (e) {

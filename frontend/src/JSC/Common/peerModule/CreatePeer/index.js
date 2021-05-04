@@ -1,5 +1,6 @@
 import Peer from "simple-peer";
-import { chatAddMessageRef } from "../../Chat/addMessage"
+import { chatAddMessageRef } from "../../ChatModule/addMessage"
+import { getDataFromPeerOn } from "../Game"
 
 export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, chatListRef, setChatList, myNickname, peerData, setPeerData, voiceRef }) => {
     navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
@@ -13,7 +14,7 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
                     peer,
                     nickname: "",
                 });
-                peers.push(peer);
+                peers.push([peer, "연결중"]);
             });
             setPeers(peers);
         });
@@ -26,16 +27,18 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
                 nickname: peerNickname,
             })
             console.log("[debug : addPeer : ", peersRef.current);
-            setPeers(users => {
-                console.log("users : ", users);
-                return [...users, peer]
-            });
+            // setPeers(users => {
+            //     console.log("users : ", users);
+            //     return [...users, [peer, peerNickname]]
+            // });
+            setPeers(peersRef.current.map((i) => [i.peer, i.nickname]));
         });
 
         socketRef.current.on("receiving returned signal", ({ id, signal, peerNickname }) => {
             const item = peersRef.current.find(p => p.peerID === id);
             item.peer.signal(signal);
             item.nickname = peerNickname;
+            setPeers(peersRef.current.map((i) => [i.peer, i.nickname]));
             console.log("receiving returned signal", peerNickname);
         });
 
@@ -44,7 +47,7 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
             console.log("disconnect user : ", peersRef.current);
             peersRef.current = peersRef.current.filter((i) => i.peerID !== socketID)
             console.log("disconnect user : ", peersRef.current);
-            setPeers(peersRef.current.map((i) => i.peer));
+            setPeers(peersRef.current.map((i) => [i.peer, i.nickname]));
         });
 
     }).catch((e) => console.log(e));
@@ -83,23 +86,8 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
         return peer;
     }
 
-    const getDataFromPeerOn = ({ peer, chatListRef, setChatList, voiceRef, setPeerData }) => {
-        peer.on('data', jsonData => {
-            const { type, nickname, data } = JSON.parse(jsonData)
-            switch (type) {
-                case "chat":
-                    chatAddMessageRef({ nickname, inputMessage: data, chatListRef, setChatList });
-                    break;
-                case "RockPaperScissors":
-                    setPeerData(data);
-                    break;
-                default:
-                    return;
-            }
-            connectVoiceRef({ peer, voiceRef });
-        });
-    }
     const connectVoiceRef = ({ peer, voiceRef }) => {
+        // 음성 채팅 추가 부분. 
         peer.on("stream", stream => {
             console.log("[debug] : voiceRef");
             if ("srcObject" in voiceRef.current) {

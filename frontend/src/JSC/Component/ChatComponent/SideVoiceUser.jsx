@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { chatAddMessage, chatAddMessageRef } from "../../Common/Chat/addMessage"
+import { chatAddMessage, chatAddMessageRef } from "../../Common/ChatModule/addMessage"
 import styled from 'styled-components'
 
 const ConnectUsers = styled.div`
@@ -36,11 +36,7 @@ const StyledAudio = styled.audio`
 const App = ({ peersRef, peers, voiceRef }) => {
     return (
         <ConnectUsers>
-            {peersRef.current.map((i) => <Test key={i.peerID}>{i.nickname}{console.log("[debug] : " + i.nickname)
-            }</Test>)}
-            {/* {peers.map((i, index) => (
-                <Audio key={"" + i._id + i.localAddress + i.localPort} peer={i} voiceRef={voiceRef} />
-            ))} */}
+            {peers.map((i) => <Test key={i[0]}>{i[1]}{console.log("[debug] : " + i[1])}</Test>)}
             {console.log(peers)}
         </ConnectUsers>
     )
