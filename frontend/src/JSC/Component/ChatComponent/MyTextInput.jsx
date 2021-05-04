@@ -2,6 +2,7 @@ import React, { memo, useState } from 'react';
 import styled from "styled-components";
 import voicetalk from "../../icon/voicetalk.svg";
 import { chatAddMessage } from "../../Common/ChatModule/addMessage"
+import { PEER_CHAT } from "../../Constants/peerDataTypes";
 
 // import { SEND_MESSAGE, socketApi } from "../../Common/socketModule";
 
@@ -80,7 +81,7 @@ const MyTextInput = ({ chatList, setChatList, myNickname, socketRef, peers }) =>
 
     const fieldSetButtonHandler = (e) => { // 텍스트가 들어있으면 버튼이 활성화 핸들러
         e.preventDefault();
-        const js = JSON.stringify({ type: "chat", nickname: myNickname, data: inputMessage })
+        const js = JSON.stringify({ type: PEER_CHAT, nickname: myNickname, data: inputMessage })
         try { // 
             console.log("[debug] : " + peers);
 

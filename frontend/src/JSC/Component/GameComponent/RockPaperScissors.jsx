@@ -4,6 +4,7 @@ import scissors from './../../image/가위.jpg'
 import rock from './../../image/바위.jpg'
 import paper from './../../image/보.jpg'
 import styled from "styled-components"
+import { PEER_ROCK_PAPER_SCISSORS } from "../../Constants/peerDataTypes";
 
 const ImageButton = styled.button`
     width: 100px;
@@ -46,7 +47,7 @@ const App = () => {
         else {
             tmp = "paper"
         }
-        const js = JSON.stringify({ type: "RockPaperScissors", nickname: user, data: tmp })
+        const js = JSON.stringify({ type: PEER_ROCK_PAPER_SCISSORS, nickname: user, data: tmp })
         try {
             peers === undefined || peers.forEach(p => {
                 p.peer.send(js);
