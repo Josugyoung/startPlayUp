@@ -1,8 +1,8 @@
 import Peer from "simple-peer";
 import { chatAddMessageRef } from "../../ChatModule/addMessage"
-import { getDataFromPeerOn } from "../Game"
+import { getDataFromPeerOn } from "../receiveFromPeers"
 
-export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, chatListRef, setChatList, myNickname, peerData, setPeerData, voiceRef }) => {
+export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname, setPeerData, voiceRef }) => {
     navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
         socketRef.current.emit("join room", roomID);
         socketRef.current.on("all users", users => {
@@ -59,7 +59,7 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
         peer.on("signal", signal => {
             socketRef.current.emit("sending signal", { userToSignal, callerID, signal, myNickname })
         })
-        connectVoiceRef({ peer, voiceRef });
+        //connectVoiceRef({ peer, voiceRef });
         getDataFromPeerOn({ peer, chatListRef, setChatList, voiceRef, setPeerData });
         return peer;
     }
@@ -77,7 +77,7 @@ export const connectPeer = ({ socketRef, roomID, peersRef, setPeers, chatList, c
         });
 
         peer.signal(incomingSignal);
-        connectVoiceRef({ peer, voiceRef });
+        //connectVoiceRef({ peer, voiceRef });
         getDataFromPeerOn({ peer, chatListRef, setChatList, voiceRef, setPeerData });
         return peer;
     }

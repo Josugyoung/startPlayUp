@@ -5,6 +5,7 @@ import rock from './../../image/바위.jpg'
 import paper from './../../image/보.jpg'
 import styled from "styled-components"
 import { PEER_ROCK_PAPER_SCISSORS } from "../../Constants/peerDataTypes";
+import { sendDataToPeers } from '../../Common/peerModule/sendToPeers'
 
 const ImageButton = styled.button`
     width: 100px;
@@ -38,6 +39,7 @@ const App = () => {
 
     const selectDataHandler = (data) => {
         let tmp;
+        let success = undefined;
         if (data === 1) {
             tmp = "scissors"
         }
@@ -47,16 +49,8 @@ const App = () => {
         else {
             tmp = "paper"
         }
-        const js = JSON.stringify({ type: PEER_ROCK_PAPER_SCISSORS, nickname: user, data: tmp })
-        try {
-            peers === undefined || peers.forEach(p => {
-                p.peer.send(js);
-            });
-            setSelectData(tmp)
-        } catch (e) {
-            console.error(e);
-        }
-
+        success = sendDataToPeers(PEER_ROCK_PAPER_SCISSORS, { nickname: user, data: tmp, peers });
+        success === true && peers.length && setSelectData(tmp);
     }
     const PrintResult = () => {
         const differnceOfData = RockPaperScissorsData[selectData][0] - RockPaperScissorsData[peerData][0];

@@ -44,11 +44,41 @@ const TextFieldWithVoiceUsers = styled.div`
       flex-direction: row;
 `;
 
-const StyledAudio = styled.video`
+const StyledAudio = styled.audio`
     height: 40%;
     width: 50%;
     display:none;
 `;
+
+const UserAudio = ({ peers, peer }) => {
+    const voiceRef = useRef();
+    const streamRef = useRef();
+    useEffect(() => {
+        peer.on("stream", stream => {
+            streamRef.current = stream;
+            voiceRef.current.srcObject = stream;
+        })
+        // return () => {
+        //     console.log("log streamRef", streamRef.current)
+        //     return peer.removeStream(streamRef.current)
+        // }
+    }, []);
+
+    // useEffect(() => {
+    //     peer.on("stream", stream => {
+    //         streamRef.current = stream;
+    //         voiceRef.current.srcObject = stream;
+    //     })
+    //     return () => {
+    //         return peer.removeStream(streamRef.current)
+    //     }
+    // }, [peers]);
+
+    return (
+        <StyledAudio playsInline autoPlay ref={voiceRef} />
+    )
+
+}
 
 
 function Index({ backgroundColor, height, width, ...props }) {
@@ -83,11 +113,16 @@ function Index({ backgroundColor, height, width, ...props }) {
         console.log(setPeerData)
         connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
 
+        // 방법 1 테스트 해보기.
         // return () => peersRef.current.forEach(i => {
         //     console.log("destroy peer", i);
         //     // i.peer.removeAllListeners();
         //     // i.peer.destroy();
         // })
+        // 방법 2 테스트 해보기.
+        // return () => {
+        //     setPeers({});
+        // }
     }, []);
 
 
@@ -96,10 +131,12 @@ function Index({ backgroundColor, height, width, ...props }) {
         chatListRef.current = [...chatList];
     }, [chatList]);
 
+
     return (
         <Chat width={height} height={width}>
             {peers.map(i => (
-                <StyledAudio key={"" + i.peer._id + i.peer.localAddress + i.peer.localPort} playsInline autoPlay ref={voiceRef} />
+                // <StyledAudio key={"" + i.peer._id + i.peer.localAddress + i.peer.localPort} playsInline autoPlay ref={voiceRef} />
+                <UserAudio key={"" + i.peer._id + i.peer.localAddress + i.peer.localPort} peer={i.peer} />
             ))}
             <Nav />
             <TextFieldWithVoiceUsers>

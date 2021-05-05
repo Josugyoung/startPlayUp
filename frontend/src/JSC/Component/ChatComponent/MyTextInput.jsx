@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import styled from "styled-components";
 import voicetalk from "../../icon/voicetalk.svg";
+import { sendDataToPeers } from '../../Common/peerModule/sendToPeers'
 import { chatAddMessage } from "../../Common/ChatModule/addMessage"
 import { PEER_CHAT } from "../../Constants/peerDataTypes";
 
@@ -81,20 +82,14 @@ const MyTextInput = ({ chatList, setChatList, myNickname, socketRef, peers }) =>
 
     const fieldSetButtonHandler = (e) => { // 텍스트가 들어있으면 버튼이 활성화 핸들러
         e.preventDefault();
-        const js = JSON.stringify({ type: PEER_CHAT, nickname: myNickname, data: inputMessage })
-        try { // 
-            console.log("[debug] : " + peers);
-
-            peers === undefined || peers.forEach(p => {
-                console.log(myNickname, inputMessage, p)
-                p.peer.send(js);
-            });
+        let success = undefined;
+        success = sendDataToPeers(PEER_CHAT, { nickname: myNickname, data: inputMessage, peers });
+        if (success) {
             chatAddMessage({ nickname: myNickname, inputMessage, chatList, setChatList });
-        } catch (e) {
-            console.error(e.name + ': ' + e.message)
-        }
-        finally {
             setInputMessage("");
+        }
+        else {
+            console.log("채팅 전송 실패");
         }
     };
 

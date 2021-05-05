@@ -1,4 +1,4 @@
-import { chatAddMessageRef } from "./../../ChatModule/addMessage"
+import { chatAddMessageRef } from "../../ChatModule/addMessage"
 import { PEER_ROCK_PAPER_SCISSORS, PEER_CHAT } from "../../../Constants/peerDataTypes";
 
 export const getDataFromPeerOn = ({ peer, chatListRef, setChatList, setPeerData }) => {
