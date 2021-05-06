@@ -3,10 +3,12 @@ import styled from 'styled-components'
 import Message from './Message'
 import MyTextInput from "./MyTextInput";
 import Nav from "./Nav";
-import { PeerDataContext, UserContext, PeersContext } from "../../store";
+import { PeerDataContext, UserContext, PeersContext, VoicePeersContext } from "../../store";
 import io from "socket.io-client";
 import { chatAddMessage } from "../../Common/ChatModule/addMessage"
-import { connectPeer } from "../../Common/peerModule/CreatePeer"
+import { connectDataPeer } from "../../Common/peerModule/CreatePeer/createDataPeers"
+import { connectVoicePeer } from "../../Common/peerModule/CreatePeer/createVoicePeers"
+
 // import { RECEIVE_MESSAGE, socketApi } from "../../Common/socketModule";
 import SideVoiceUser from "./SideVoiceUser";
 
@@ -52,27 +54,11 @@ const StyledAudio = styled.audio`
 
 const UserAudio = ({ peers, peer }) => {
     const voiceRef = useRef();
-    const streamRef = useRef();
     useEffect(() => {
         peer.on("stream", stream => {
-            streamRef.current = stream;
             voiceRef.current.srcObject = stream;
         })
-        // return () => {
-        //     console.log("log streamRef", streamRef.current)
-        //     return peer.removeStream(streamRef.current)
-        // }
     }, []);
-
-    // useEffect(() => {
-    //     peer.on("stream", stream => {
-    //         streamRef.current = stream;
-    //         voiceRef.current.srcObject = stream;
-    //     })
-    //     return () => {
-    //         return peer.removeStream(streamRef.current)
-    //     }
-    // }, [peers]);
 
     return (
         <StyledAudio playsInline autoPlay ref={voiceRef} />
@@ -89,6 +75,8 @@ function Index({ backgroundColor, height, width, ...props }) {
     const { user } = useContext(UserContext);
     const { peerData, setPeerData } = useContext(PeerDataContext);
     const { peers, setPeers } = useContext(PeersContext);
+    const { voicePeers, setVoicePeers } = useContext(VoicePeersContext);
+
     // chat nickname
     const myNickName = user;
     // chat state for rerendering
@@ -98,9 +86,9 @@ function Index({ backgroundColor, height, width, ...props }) {
     const scrollRef = useRef(null);
 
     const voiceRef = useRef();
-    // peer state for rerendering
-    //const [peers, setPeers] = useState([]);
+
     let peersRef = useRef([]);
+    let voicePeersRef = useRef([]);
     const roomID = "9a06eb80-9fd4-11eb-a3e2-377a237cffe7";
 
     const scrollToBottom = () => {
@@ -111,13 +99,14 @@ function Index({ backgroundColor, height, width, ...props }) {
     useEffect(() => {
         socketRef.current = io.connect("/");
         console.log(setPeerData)
-        connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
-
+        // connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
+        connectDataPeer({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname: user, setPeerData });
+        // connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname: user });
         // 방법 1 테스트 해보기.
         // return () => peersRef.current.forEach(i => {
         //     console.log("destroy peer", i);
-        //     // i.peer.removeAllListeners();
-        //     // i.peer.destroy();
+        //     i.peer.removeAllListeners();
+        //     i.peer.destroy();
         // })
         // 방법 2 테스트 해보기.
         // return () => {

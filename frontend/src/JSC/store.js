@@ -47,6 +47,8 @@ export const PeerDataContext = createContext({
 });
 
 export const PeersContext = createContext([]);
+export const VoicePeersContext = createContext([]);
+
 
 const GamePage = styled.div`
     display:flex;
@@ -58,6 +60,7 @@ function Store() {
     const { user, isAuthenticated } = state;
     const [peerData, setPeerData] = useState();
     const [peers, setPeers] = useState([]);
+    const [voicePeers, setVoicePeers] = useState([]);
     const value = useMemo(() => ({
         user: user,
         isAuthenticated: isAuthenticated,
@@ -69,12 +72,14 @@ function Store() {
         <UserContext.Provider value={value}>
             <PeerDataContext.Provider value={{ peerData, setPeerData }}>
                 <PeersContext.Provider value={{ peers, setPeers }}>
-                    <Route path="/" component={ChatContainer} />
-                    <Route exact path="/" component={LoginPageContainer} />
-                    {isAuthenticated && <Route exact path="/chat" render={() => <GamePage>
-                        <RockPaperScissors />
-                        <ChatComponent />
-                    </GamePage>} />}
+                    <VoicePeersContext.Provider value={{ voicePeers, setVoicePeers }}>
+                        <Route path="/" component={ChatContainer} />
+                        <Route exact path="/" component={LoginPageContainer} />
+                        {isAuthenticated && <Route exact path="/chat" render={() => <GamePage>
+                            <RockPaperScissors />
+                            <ChatComponent />
+                        </GamePage>} />}
+                    </VoicePeersContext.Provider>
                 </PeersContext.Provider>
             </PeerDataContext.Provider>
         </UserContext.Provider >
