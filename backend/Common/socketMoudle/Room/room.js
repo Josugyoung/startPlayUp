@@ -18,6 +18,7 @@ module.exports = ({ io, socket, roomMatchingUsers }) => {
         }
         else {
             socket.emit("Duplicate ID");
+            socket.disconnect();
         }
     });
 
