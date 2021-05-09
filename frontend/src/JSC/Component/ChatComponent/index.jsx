@@ -98,10 +98,12 @@ function Index({ backgroundColor, height, width, ...props }) {
 
     useEffect(() => {
         socketRef.current = io.connect("/");
-        console.log(setPeerData)
         // connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
+        // let result = true;
+        // result = connectDataPeer({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname: user, setPeerData });
+        // result && connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname: user });
         connectDataPeer({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname: user, setPeerData });
-        // connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname: user });
+        connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname: user });
         // 방법 1 테스트 해보기.
         // return () => peersRef.current.forEach(i => {
         //     console.log("destroy peer", i);
@@ -114,7 +116,7 @@ function Index({ backgroundColor, height, width, ...props }) {
         // }
     }, []);
 
-
+    console.log("asdf", chatList)
     useEffect(() => {
         scrollToBottom();
         chatListRef.current = [...chatList];
@@ -123,10 +125,6 @@ function Index({ backgroundColor, height, width, ...props }) {
 
     return (
         <Chat width={height} height={width}>
-            {peers.map(i => (
-                // <StyledAudio key={"" + i.peer._id + i.peer.localAddress + i.peer.localPort} playsInline autoPlay ref={voiceRef} />
-                <UserAudio key={"" + i.peer._id + i.peer.localAddress + i.peer.localPort} peer={i.peer} />
-            ))}
             <Nav />
             <TextFieldWithVoiceUsers>
                 <TextField className="textField" ref={scrollRef}>

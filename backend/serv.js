@@ -6,7 +6,7 @@ const socket = require("socket.io");
 const io = socket(server);
 const socketModule = require("./Common/socketMoudle");
 
-socketModule({io});
+socketModule({ io });
 
 
 

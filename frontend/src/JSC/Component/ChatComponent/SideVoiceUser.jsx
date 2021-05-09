@@ -10,34 +10,15 @@ const ConnectUsers = styled.div`
     text-overflow:ellipsis;
     flex-grow:0;
 `;
-const Test = styled.div`
+const PeersList = styled.div`
     overflow:hidden;
     text-overflow:ellipsis;
 `;
 
-const StyledAudio = styled.audio`
-    height: 40%;
-    width: 50%;
-    display:none;
-`;
-
-// const Audio = ({ voiceRef }) => {
-//     // useEffect(() => {
-//     //     peer.on("stream", stream => {
-//     //         console.log("asdf")
-//     //         ref.current.srcObject = stream;
-//     //     });
-//     // }, []);
-//     return (
-//         <StyledAudio playsInline autoPlay ref={voiceRef} />
-//     );
-// }
-
-const App = ({ peersRef, peers, voiceRef }) => {
+const App = ({ peers }) => {
     return (
         <ConnectUsers>
-            {peers.map((i) => <Test key={i.peer}>{i.nickname}{console.log("[debug] : " + i.nickname)}</Test>)}
-            {console.log(peers)}
+            {peers.map((i) => <PeersList key={i.peer}>{i.nickname}</PeersList>)}
         </ConnectUsers>
     )
 }

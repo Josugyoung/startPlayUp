@@ -11,6 +11,9 @@ export const getDataFromPeerOn = ({ peer, chatListRef, setChatList, setPeerData 
             case PEER_ROCK_PAPER_SCISSORS:
                 setPeerData(data);
                 break;
+            case TICHU:
+                setPeerData(data);
+                break;
             default:
                 return;
         }

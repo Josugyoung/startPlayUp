@@ -1,8 +1,9 @@
 import Peer from "simple-peer";
 export const connectVoicePeer = ({ socketRef, roomID, voicePeersRef, setVoicePeers, myNickname }) => {
     navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(stream => {
-        socketRef.current.emit("join room", roomID);
-        socketRef.current.on("all users", users => {
+        socketRef.current.emit("join voice room", { roomID, myNickname });
+
+        socketRef.current.on("all voice users", users => {
             const peers = [];
             users.forEach(userID => {
                 const peer = createPeer(userID, socketRef.current.id, stream);
@@ -16,7 +17,7 @@ export const connectVoicePeer = ({ socketRef, roomID, voicePeersRef, setVoicePee
             setVoicePeers(peers);
         });
 
-        socketRef.current.on("user joined", ({ signal, callerID, peerNickname }) => {
+        socketRef.current.on("voice user joined", ({ signal, callerID, peerNickname }) => {
             const peer = addPeer(signal, callerID, stream);
             voicePeersRef.current.push({
                 peerID: callerID,
@@ -27,21 +28,21 @@ export const connectVoicePeer = ({ socketRef, roomID, voicePeersRef, setVoicePee
             setVoicePeers(voicePeersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
         });
 
-        socketRef.current.on("receiving returned signal", ({ id, signal, peerNickname }) => {
+        socketRef.current.on("receiving returned voice signal", ({ id, signal, peerNickname }) => {
             const item = voicePeersRef.current.find(p => p.peerID === id);
             item.peer.signal(signal);
             item.nickname = peerNickname;
             setVoicePeers(voicePeersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
-            console.log("receiving returned signal", peerNickname);
+            console.log("receiving returned voice signal", peerNickname);
         });
 
-        socketRef.current.on("disconnect user", (socketID) => {
-            console.log(socketID);
-            console.log("disconnect user : ", voicePeersRef.current);
-            voicePeersRef.current = voicePeersRef.current.filter((i) => i.peerID !== socketID)
-            console.log("disconnect user : ", voicePeersRef.current);
-            setVoicePeers(voicePeersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
-        });
+        // socketRef.current.on("disconnect voice user", (socketID) => {
+        //     console.log(socketID);
+        //     console.log("disconnect voice user : ", voicePeersRef.current);
+        //     voicePeersRef.current = voicePeersRef.current.filter((i) => i.peerID !== socketID)
+        //     console.log("disconnect voice user : ", voicePeersRef.current);
+        //     setVoicePeers(voicePeersRef.current.map((i) => ({ peer: i.peer, nickname: i.nickname })));
+        // });
 
     }).catch((e) => console.log(e));
 
@@ -51,11 +52,22 @@ export const connectVoicePeer = ({ socketRef, roomID, voicePeersRef, setVoicePee
             initiator: true,
             trickle: false,
             stream,
+            iceServers: [
+                {
+                    urls: process.env.STUN_DOMAIN,
+                },
+                {
+                    urls: process.env.TURN_DOMAIN,
+                    username: process.env.TURN_ID,
+                    credential: process.env.PASSWORD
+                }
+            ],
         });
 
         peer.on("signal", signal => {
-            socketRef.current.emit("sending signal", { userToSignal, callerID, signal, myNickname })
+            socketRef.current.emit("sending voice signal", { userToSignal, callerID, signal, myNickname })
         })
+        // connectVoiceRef({ peer, voiceRef });
         return peer;
     }
 
@@ -65,12 +77,34 @@ export const connectVoicePeer = ({ socketRef, roomID, voicePeersRef, setVoicePee
             initiator: false,
             trickle: false,
             stream,
+            iceServers: [
+                {
+                    urls: process.env.STUN_DOMAIN,
+                },
+                {
+                    urls: process.env.TURN_DOMAIN,
+                    username: process.env.TURN_ID,
+                    credential: process.env.PASSWORD
+                }
+            ],
         });
 
         peer.on("signal", signal => {
-            socketRef.current.emit("returning signal", { signal, callerID, myNickname })
+            socketRef.current.emit("returning voice signal", { signal, callerID, myNickname })
         });
         peer.signal(incomingSignal);
+        // connectVoiceRef({ peer, voiceRef });
         return peer;
+    }
+
+    const connectVoiceRef = ({ peer, voiceRef }) => {
+        // 음성 채팅 추가 부분. 
+        peer.on("stream", stream => {
+            console.log("[debug] : voiceRef");
+            if ("srcObject" in voiceRef.current) {
+                console.log("voiceRef", voiceRef.current)
+                voiceRef.current.srcObject = stream;
+            }
+        });
     }
 }

@@ -1,8 +1,12 @@
 import Peer from "simple-peer";
 import { getDataFromPeerOn } from "../../receiveFromPeers"
+require("dotenv").config()
 
 export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname, setPeerData }) => {
-    socketRef.current.emit("join room", roomID);
+    socketRef.current.emit("join room", { roomID, myNickname });
+    socketRef.current.on("Duplicate ID", users => {
+        return false;
+    })
     socketRef.current.on("all users", users => {
         const peers = [];
         users.forEach(userID => {
@@ -48,6 +52,16 @@ export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, chatLis
         const peer = new Peer({
             initiator: true,
             trickle: false,
+            iceServers: [
+                {
+                    urls: process.env.STUN_DOMAIN,
+                },
+                {
+                    urls: process.env.TURN_DOMAIN,
+                    username: process.env.TURN_ID,
+                    credential: process.env.PASSWORD
+                }
+            ],
         });
 
         peer.on("signal", signal => {
@@ -62,6 +76,16 @@ export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, chatLis
         const peer = new Peer({
             initiator: false,
             trickle: false,
+            iceServers: [
+                {
+                    urls: process.env.STUN_DOMAIN,
+                },
+                {
+                    urls: process.env.TURN_DOMAIN,
+                    username: process.env.TURN_ID,
+                    credential: process.env.PASSWORD
+                }
+            ],
         });
 
         peer.on("signal", signal => {

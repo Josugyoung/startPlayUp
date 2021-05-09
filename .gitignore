@@ -29,3 +29,4 @@ frontend/backup
 backend/node_modules
 backend/testf
 backend/testServerFile
+.env

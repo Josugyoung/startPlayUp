@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, memo } from 'react';
 import { PeerDataContext, PeersContext, UserContext } from '../../store';
 import scissors from './../../image/가위.jpg'
 import rock from './../../image/바위.jpg'
@@ -76,7 +76,7 @@ const App = () => {
             {selectData !== "" && <div>본인이 낸 것 : {selectData}</div>}
             {
                 Object.values(RockPaperScissorsData).map((i) => {
-                    return <ImageButton onClick={() => selectDataHandler(i[0])}>
+                    return <ImageButton key={i[1]} onClick={() => selectDataHandler(i[0])}>
                         <Img src={i[1]} />
                     </ImageButton>
                 })
@@ -85,4 +85,4 @@ const App = () => {
         </GameField >
     )
 }
-export default App;
+export default memo(App);

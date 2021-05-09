@@ -3,7 +3,8 @@ export const sendDataToPeers = (type, { nickname, data, peers }) => {
     let success = false;
     try { // 
         peers === undefined || peers.forEach(p => {
-            p.peer.send(js);
+            console.log("[debug] sendDataToPeers ")
+            p.peer.write(js);
         });
         success = true;
 
