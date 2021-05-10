@@ -7,6 +7,7 @@ import ChatComponent from "./Component/ChatComponent";
 import RockPaperScissors from "./Component/GameComponent/RockPaperScissors";
 import { BrowserRouter } from 'react-router-dom';
 import styled from 'styled-components';
+import MineSearch from "JSC/Container/MineSearch";
 
 const GamePage = styled.div`
     display:flex;
@@ -17,10 +18,11 @@ function app() {
     const { isAuthenticated } = useContext(UserContext);
     return (
         <BrowserRouter>
-            <Route path="/" component={ChatContainer} />
+            {/* <Route path="/" component={ChatContainer} /> */}
             <Route exact path="/" component={LoginPageContainer} />
             {isAuthenticated && <Route exact path="/chat" render={() => <GamePage>
                 <RockPaperScissors />
+                <MineSearch />
                 <ChatComponent />
             </GamePage>} />}
         </BrowserRouter>

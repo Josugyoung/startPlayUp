@@ -3,11 +3,11 @@ import styled from 'styled-components'
 import Message from './Message'
 import MyTextInput from "./MyTextInput";
 import Nav from "./Nav";
-import { PeerDataContext, UserContext, PeersContext, VoicePeersContext } from "../../store";
+import { PeerDataContext, UserContext, PeersContext, VoicePeersContext } from "JSC/store";
 import io from "socket.io-client";
-import { chatAddMessage } from "../../Common/ChatModule/addMessage"
-import { connectDataPeer } from "../../Common/peerModule/CreatePeer/createDataPeers"
-import { connectVoicePeer } from "../../Common/peerModule/CreatePeer/createVoicePeers"
+import { chatAddMessage } from "JSC/Common/ChatModule/addMessage"
+import { connectDataPeer } from "JSC/Common/peerModule/CreatePeer/createDataPeers"
+import { connectVoicePeer } from "JSC/Common/peerModule/CreatePeer/createVoicePeers"
 
 // import { RECEIVE_MESSAGE, socketApi } from "../../Common/socketModule";
 import SideVoiceUser from "./SideVoiceUser";
