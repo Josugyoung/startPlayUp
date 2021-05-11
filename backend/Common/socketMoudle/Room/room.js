@@ -10,7 +10,7 @@ module.exports = ({ io, socket, roomMatchingUsers }) => {
             if (roomMatchingUsers[roomID] === undefined) {
                 roomMatchingUsers[roomID] = [];
             }
-            roomMatchingUsers[roomID].push(socket.nickname);
+            roomMatchingUsers[roomID].push(myNickname);
             console.log("join room", roomID, myNickname);
             console.log("join usersInThisRoom", usersInThisRoom);
             console.log("join roomMatchingUsers", roomMatchingUsers);
