@@ -66,6 +66,8 @@
   },
   "proxy": "http://localhost:4444",
   "devDependencies": {
+    "@types/react": "^17.0.5",
+    "@types/styled-components": "^5.1.9",
     "eslint-config-prettier": "^8.3.0"
   }
 }

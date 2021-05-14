@@ -1,5 +1,6 @@
 import React, { createContext, useMemo, useReducer, useState, useRef, useEffect, memo, Children } from "react";
 import { LOGIN, GET_CHATLIST, SET_CHATLIST } from './Constants/actionTypes';
+import { PEER_CHAT } from "JSC/Constants/peerDataTypes"
 import { testDB } from "./Common/TestDB";
 import styled from 'styled-components'
 
@@ -30,60 +31,10 @@ const reducer = (state, action) => {
             return state;
     }
 };
-export const UserContext = createContext({
-    user: "",
-    isAuthenticated: false,
-    dispatch: () => { }
-});
-
-export const PeerDataContext = createContext({
-    peerData: "",
-    setpeerData: ""
-});
-
-export const PeersContext = createContext([]);
-export const VoicePeersContext = createContext([]);
-
-//// 하드코딩 하니 된다??? public html 파일에 <audio></audio> 태그 추가 후 사용함.
-// const UserAudio = ({ voicePeers, peer }) => {
-//     const voiceRef = useRef();
-//     const streamRef = useRef(undefined);
-//     useEffect(() => {
-//         peer.on("stream", stream => {
-//             // voiceRef.current.srcObject = stream;
-//             // streamRef.current = stream;
-//             var audio = document.querySelector('audio')
-//             if ('srcObject' in audio) {
-//                 audio.srcObject = stream
-//             } else {
-//                 audio.src = window.URL.createObjectURL(stream) // for older browsers
-//             }
-//             audio.play();
-//         })
-//     }, []);
-//     // useEffect(() => {
-//     //     voiceRef.current.srcObject = streamRef.current;
-//     // }, [voicePeers]);
-
-//     return (<></>
-//         // <StyledAudio playsInline autoPlay ref={voiceRef} />
-//     )
-// }
-
-
-// const UserAudio = ({ voicePeers, peer }) => {
-//     const voiceRef = useRef();
-//     const streamRef = useRef(undefined);
-//     useEffect(() => {
-//         peer.on("stream", stream => {
-//             voiceRef.current.srcObject = stream;
-//             streamRef.current = stream;
-//         })
-//     }, []);
-//     return (
-//         <StyledAudio playsInline autoPlay ref={voiceRef} />
-//     )
-// }
+export const UserContext = createContext();
+export const PeerDataContext = createContext();
+export const PeersContext = createContext();
+export const VoicePeersContext = createContext();
 
 
 const StyledAudio = styled.audio`
@@ -107,19 +58,39 @@ const Audio = (props) => {
 export const Store = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
     const { user, isAuthenticated } = state;
-    const [peerData, setPeerData] = useState();
-    const [peers, setPeers] = useState([]);
-    const [voicePeers, setVoicePeers] = useState([]);
-    const value = useMemo(() => ({
+    const valueUserContext = useMemo(() => ({
         user: user,
         isAuthenticated: isAuthenticated,
         dispatch: dispatch
     }), [user, isAuthenticated]);
+
+    const [peerData, setPeerData] = useState({ type: "" });
+    const valuePeerData = useMemo(() => ({
+        peerData,
+        setPeerData
+    }), [peerData]);
+
+
+    const [peers, setPeers] = useState([]);
+    const valuePeers = useMemo(() => ({
+        peers,
+        setPeers
+    }), [peers]);
+
+    const [voicePeers, setVoicePeers] = useState([]);
+    const valueVoicePeers = useMemo(() => ({
+        voicePeers,
+        setVoicePeers
+    }), [voicePeers]);
+
+
+
+
+
     // dispatch는 실행중 변경하지 않기에 useMemo를 통해 제함.
 
     return (
         <>
-            {console.log("voice Peers", voicePeers)}
             {
                 voicePeers.map(({ peer }, index) => {
                     return (
@@ -127,10 +98,10 @@ export const Store = ({ children }) => {
                     );
                 })
             }
-            <UserContext.Provider value={value}>
-                <PeerDataContext.Provider value={{ peerData, setPeerData }}>
-                    <PeersContext.Provider value={{ peers, setPeers }}>
-                        <VoicePeersContext.Provider value={{ voicePeers, setVoicePeers }}>
+            <UserContext.Provider value={valueUserContext}>
+                <PeerDataContext.Provider value={valuePeerData}>
+                    <PeersContext.Provider value={valuePeers}>
+                        <VoicePeersContext.Provider value={valueVoicePeers}>
                             {children}
                         </VoicePeersContext.Provider>
                     </PeersContext.Provider>

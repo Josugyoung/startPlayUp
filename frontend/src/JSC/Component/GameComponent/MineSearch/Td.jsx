@@ -1,5 +1,6 @@
 import React, { useContext, memo, useCallback } from 'react';
-import { CODE, TableContext, OPEN_CELL, CLICK_MINE, FLAG_CELL, QUESTION_CELL, NORMALIZE_CELL } from 'JSC/Container/MineSearch';
+import { CODE, TableContext, OPEN_CELL, CLICK_MINE, FLAG_CELL, QUESTION_CELL, NORMALIZE_CELL, SEND_GAME_DATA } from 'JSC/Container/MineSearch';
+import styled from "styled-components";
 
 const getTdStyle = (code) => {
     switch (code) {
@@ -60,6 +61,12 @@ const getTdText = (code) => {
 }
 
 
+
+const StyledTd = styled.td`
+    display:flex;
+    justify-content:space-between;
+`;
+
 const Td = memo(({ rowIndex, cellIndex }) => {
     const { tableData, dispatch, halted } = useContext(TableContext);
 
@@ -84,7 +91,8 @@ const Td = memo(({ rowIndex, cellIndex }) => {
                 return;
             }
             default: return;
-        }
+        };
+        dispatch({ type: SEND_GAME_DATA });
     }, [tableData[rowIndex][cellIndex], halted]);
     const onRightClickTd = useCallback((e) => {
         e.preventDefault();

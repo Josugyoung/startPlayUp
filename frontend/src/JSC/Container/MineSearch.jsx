@@ -1,7 +1,10 @@
-import React, { useReducer, useEffect, createContext, useMemo, memo } from 'react';
+import React, { useReducer, useEffect, createContext, useMemo, memo, useContext } from 'react';
 import Table from 'JSC/Component/GameComponent/MineSearch/Table';
 import Form from 'JSC/Component/GameComponent/MineSearch/Form';
 import styled from 'styled-components';
+import { PEER_MINE_SEARCH } from 'JSC/Constants/peerDataTypes';
+import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
+import { sendDataToPeers } from 'JSC/Common/peerModule/sendToPeers';
 
 export const UPDATE_TIMER = 'UPDATE_TIMER';
 export const START_GAME = 'START_GAME';
@@ -10,6 +13,7 @@ export const CLICK_MINE = 'CLICK_MINE';
 export const FLAG_CELL = 'FLAG_CELL';
 export const QUESTION_CELL = 'QUESTION_CELL';
 export const NORMALIZE_CELL = 'NORMALIZE_CELL';
+export const SEND_GAME_DATA = 'SEND_GAME_DATA';
 
 
 export const CODE = {
@@ -76,12 +80,27 @@ const plantMine = (row, cell, mine) => {
 
 
 const reducer = (state, action) => {
+    const { user } = useContext(UserContext);
+    const { peers } = useContext(PeersContext);
+    const nickname = user;
     switch (action.type) {
+        case "GetDataFromPeer": {
+            return {
+                ...state,
+                tableData: action.tableData,
+                data: action.data,
+                timer: 0,
+                halted: action.halted,
+                openedCount: 0,
+            }
+        }
+
+
         case START_GAME: {
             // const arrayRowCell = [action.row].map(v => {
             //     Array(action.cell).fill(0);
             // });
-            return {
+            const tableObject = {
                 ...state,
                 tableData: plantMine(action.row, action.cell, action.mine),
                 data: {
@@ -93,6 +112,10 @@ const reducer = (state, action) => {
                 halted: false,
                 openedCount: 0,
             }
+            // sendDataToPeers(PEER_MINE_SEARCH, { nickname: action.nickname, data: { tableData: tableObject.tableData, data: tableObject.data, halted: tableObject.halted }, peers: action.peers });
+            sendDataToPeers(PEER_MINE_SEARCH, { nickname, data: { tableData: tableObject.tableData, data: tableObject.data, halted: tableObject.halted }, peers });
+
+            return tableObject
         }
         case OPEN_CELL: {
             const tableData = [...state.tableData]
@@ -170,13 +193,21 @@ const reducer = (state, action) => {
                 result = `${state.timer}초만에 승리하셨습니다`;
             }
 
-            return {
+            const data = {
                 ...state,
                 tableData,
                 openedCount: state.openedCount + openedCount,
                 halted: halted,
                 result: result,
             }
+
+            sendDataToPeers(PEER_MINE_SEARCH, {
+                nickname,
+                data,
+                peers
+            })
+
+            return data;
 
         }
         case CLICK_MINE: {
@@ -237,6 +268,10 @@ const reducer = (state, action) => {
                 timer: (state.timer + 1)
             }
         }
+        case SEND_GAME_DATA: {
+
+            return;
+        }
         default:
             return state;
     }
@@ -246,8 +281,15 @@ const StyledDivMine = styled.div`
     flex-direction:column;
 `;
 
-const MineSearch = () => {
+const StyledTable = styled(Table)`
+    width:400px;
+    height:400px;
+    margin:10px;
+`;
+
+const MineSearch = (props,) => {
     const [state, dispatch] = useReducer(reducer, initialState);
+    const { peerData } = useContext(PeerDataContext);
     const { tableData, halted, timer, result } = state;
 
     const value = useMemo(() => ({ tableData, halted, dispatch }), [tableData, halted]);
@@ -264,15 +306,22 @@ const MineSearch = () => {
         }
     }, [halted])
 
+    useEffect(() => {
+        if (peerData.type === PEER_MINE_SEARCH) {
+            const { tableData, data, halted } = peerData.data;
+            dispatch({ type: "GetDataFromPeer", tableData, data, halted })
+        }
+    }, [peerData])
+
     return (
-        <StyledDivMine>
+        <div>
             <TableContext.Provider value={value}>
                 <Form />
                 <div>{timer}</div>
-                <Table />
+                <StyledTable />
                 <div>{result}</div>
             </TableContext.Provider>
-        </StyledDivMine>
+        </div>
     )
 }
 

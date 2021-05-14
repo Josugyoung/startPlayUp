@@ -1,6 +1,16 @@
 import React, { useContext, memo } from 'react';
 import Td from './Td';
 import { TableContext } from 'JSC/Container/MineSearch';
+import styled from 'styled-components';
+
+
+
+const StyledTr = styled.tr`
+    width:inherit;
+    display:flex;
+    justify-content:space-between;
+    height:inherit;
+`;
 
 const Tr = memo(({ rowIndex }) => {
     const { tableData } = useContext(TableContext);

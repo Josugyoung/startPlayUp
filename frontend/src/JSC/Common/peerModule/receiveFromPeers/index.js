@@ -1,21 +1,12 @@
 import { chatAddMessageRef } from "../../ChatModule/addMessage"
-import { PEER_ROCK_PAPER_SCISSORS, PEER_CHAT } from "../../../Constants/peerDataTypes";
+import React, { useContext } from "react";
+import { PeerDataContext } from 'JSC/store'
+import { PEER_ROCK_PAPER_SCISSORS, PEER_CHAT, GAME_UPDATE, GAME_DEL } from "../../../Constants/peerDataTypes";
 
-export const getDataFromPeerOn = ({ peer, chatListRef, setChatList, setPeerData }) => {
+export const getDataFromPeer = ({ peer, setPeerData }) => {
+    // const { setPeerData } = useContext(PeerDataContext);
     peer.on('data', jsonData => {
         const { type, nickname, data } = JSON.parse(jsonData)
-        switch (type) {
-            case PEER_CHAT:
-                chatAddMessageRef({ nickname, inputMessage: data, chatListRef, setChatList });
-                break;
-            case PEER_ROCK_PAPER_SCISSORS:
-                setPeerData(data);
-                break;
-            case TICHU:
-                setPeerData(data);
-                break;
-            default:
-                return;
-        }
+        setPeerData({ type, nickname, data });
     });
 }

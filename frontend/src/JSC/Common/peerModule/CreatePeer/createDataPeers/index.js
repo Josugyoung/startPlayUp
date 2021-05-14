@@ -1,8 +1,8 @@
 import Peer from "simple-peer";
-import { getDataFromPeerOn } from "../../receiveFromPeers"
+import { getDataFromPeer } from "../../receiveFromPeers"
 require("dotenv").config()
 
-export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname, setPeerData }) => {
+export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, myNickname, setPeerData }) => {
     socketRef.current.emit("join room", { roomID, myNickname });
     socketRef.current.on("Duplicate ID", users => {
         return false;
@@ -67,7 +67,8 @@ export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, chatLis
         peer.on("signal", signal => {
             socketRef.current.emit("sending signal", { userToSignal, callerID, signal, myNickname })
         })
-        getDataFromPeerOn({ peer, chatListRef, setChatList, setPeerData });
+        getDataFromPeer({ peer, setPeerData });
+        // peer.on('close', () => console.log("peer close"));
         return peer;
     }
 
@@ -93,7 +94,8 @@ export const connectDataPeer = ({ socketRef, roomID, peersRef, setPeers, chatLis
         });
 
         peer.signal(incomingSignal);
-        getDataFromPeerOn({ peer, chatListRef, setChatList, setPeerData });
+        getDataFromPeer({ peer, setPeerData });
+        // peer.on('close', () => console.log("peer close"));
         return peer;
     }
 }

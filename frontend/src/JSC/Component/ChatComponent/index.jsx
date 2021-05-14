@@ -5,12 +5,15 @@ import MyTextInput from "./MyTextInput";
 import Nav from "./Nav";
 import { PeerDataContext, UserContext, PeersContext, VoicePeersContext } from "JSC/store";
 import io from "socket.io-client";
+import { PEER_CHAT } from "JSC/Constants/peerDataTypes"
 import { chatAddMessage } from "JSC/Common/ChatModule/addMessage"
 import { connectDataPeer } from "JSC/Common/peerModule/CreatePeer/createDataPeers"
 import { connectVoicePeer } from "JSC/Common/peerModule/CreatePeer/createVoicePeers"
+import Peer from 'simple-peer';
 
 // import { RECEIVE_MESSAGE, socketApi } from "../../Common/socketModule";
 import SideVoiceUser from "./SideVoiceUser";
+import { getDataFromPeerOn } from 'JSC/Common/peerModule/receiveFromPeers';
 
 const TextField = styled.div`
   display:flex;
@@ -70,22 +73,16 @@ const UserAudio = ({ peers, peer }) => {
 function Index({ backgroundColor, height, width, ...props }) {
     // socket io.connect
     const socketRef = useRef();
-
-
     const { user } = useContext(UserContext);
+    const myNickname = user;
     const { peerData, setPeerData } = useContext(PeerDataContext);
     const { peers, setPeers } = useContext(PeersContext);
     const { voicePeers, setVoicePeers } = useContext(VoicePeersContext);
-
-    // chat nickname
-    const myNickName = user;
     // chat state for rerendering
     const [chatList, setChatList] = useState([]);
     let chatListRef = useRef([...chatList]);
     // scroll ref;
     const scrollRef = useRef(null);
-
-    const voiceRef = useRef();
 
     let peersRef = useRef([]);
     let voicePeersRef = useRef([]);
@@ -96,14 +93,25 @@ function Index({ backgroundColor, height, width, ...props }) {
         scrollRef.current.scrollTop = scrollHeight - clientHeight;
     };
 
+    const peersDestory = (peers, voicePeers) => {
+        peers.forEach((peer) => {
+            console.log("return useEffect peer destroy")
+            peer.peer.destroy()
+        });
+
+        voicePeers.forEach((voicePeer) => {
+            voicePeer.peer.destroy()
+        });
+    }
     useEffect(() => {
         socketRef.current = io.connect("/");
-        // connectPeer({ socketRef, peersRef, roomID, peers, setPeers, chatList, chatListRef, setChatList, myNickname: user, peerData, setPeerData, voiceRef });
-        // let result = true;
-        // result = connectDataPeer({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname: user, setPeerData });
-        // result && connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname: user });
-        connectDataPeer({ socketRef, roomID, peersRef, setPeers, chatListRef, setChatList, myNickname: user, setPeerData });
-        connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname: user });
+        // if (Peer.WEBRTC_SUPPORT) {
+        connectDataPeer({ socketRef, roomID, peersRef, setPeers, myNickname, setPeerData });
+        connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname });
+        // } else {
+        //     console.log("webrtc not support!")
+        // }
+
         // 방법 1 테스트 해보기.
         // return () => peersRef.current.forEach(i => {
         //     console.log("destroy peer", i);
@@ -114,13 +122,22 @@ function Index({ backgroundColor, height, width, ...props }) {
         // return () => {
         //     setPeers({});
         // }
+        // return () => {
+        //     peersDestory(peers, voicePeers)
+        // };
     }, []);
 
-    console.log("asdf", chatList)
+
     useEffect(() => {
         scrollToBottom();
-        chatListRef.current = [...chatList];
     }, [chatList]);
+
+    useEffect(() => {
+        if (peerData.type === PEER_CHAT) {
+            console.log("peerData : ", peerData)
+            chatAddMessage({ nickname: peerData.nickname, inputMessage: peerData.data, chatList, setChatList })
+        }
+    }, [peerData])
 
 
     return (
@@ -129,15 +146,14 @@ function Index({ backgroundColor, height, width, ...props }) {
             <TextFieldWithVoiceUsers>
                 <TextField className="textField" ref={scrollRef}>
                     {chatList.map((i, index) => <Message key={"chat" + index}
-                        who={i.nickname === myNickName ? "me" : "another"}
+                        who={i.nickname === myNickname ? "me" : "another"}
                         chatObject={i} chatList={chatList} />)}
                 </TextField>
                 <SideVoiceUser peersRef={peersRef} peers={peers} chatList={chatList} setChatList={setChatList} />
             </TextFieldWithVoiceUsers>
-            <MyTextInput peers={peers} myNickname={myNickName} chatList={chatList} setChatList={setChatList}
+            <MyTextInput peers={peers} myNickname={myNickname} chatList={chatList} setChatList={setChatList}
                 socketRef={socketRef} />
-
-        </Chat>
+        </Chat >
     );
 }
 

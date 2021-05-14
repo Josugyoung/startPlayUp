@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Store, UserContext } from "./store"
 import { Route, Switch } from 'react-router-dom';
 import LoginPageContainer from "./Container/LoginPageContainer";
-import ChatContainer from "./Container/ChatContainer";
+import GlobalContainer from "./Container/GlobalContainer";
 import ChatComponent from "./Component/ChatComponent";
 import RockPaperScissors from "./Component/GameComponent/RockPaperScissors";
 import { BrowserRouter } from 'react-router-dom';
@@ -18,7 +18,7 @@ function app() {
     const { isAuthenticated } = useContext(UserContext);
     return (
         <BrowserRouter>
-            {/* <Route path="/" component={ChatContainer} /> */}
+            {/* <Route path="/" component={GlobalContainer} /> */}
             <Route exact path="/" component={LoginPageContainer} />
             {isAuthenticated && <Route exact path="/chat" render={() => <GamePage>
                 <RockPaperScissors />
