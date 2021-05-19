@@ -80,9 +80,9 @@ const plantMine = (row, cell, mine) => {
 
 
 const reducer = (state, action) => {
-    const { user } = useContext(UserContext);
+    // const { user } = useContext(UserContext);
     const { peers } = useContext(PeersContext);
-    const nickname = user;
+    const nickname = localStorage.getItem('nickname');
     switch (action.type) {
         case "GetDataFromPeer": {
             return {

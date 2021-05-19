@@ -6,7 +6,7 @@ const Form = memo(() => {
     const [cell, setCell] = useState(10);
     const [mine, setMine] = useState(20);
     const { dispatch } = useContext(TableContext);
-    const { user } = useContext(UserContext);
+    // const { user } = useContext(UserContext);
     const { peers } = useContext(PeersContext);
     // const test = useContext(TableContext);
     // console.log(test);
@@ -27,7 +27,7 @@ const Form = memo(() => {
     }, [row, cell]);
 
     const onClickBtn = useCallback(() => {
-        dispatch({ type: START_GAME, cell: parseInt(cell), row: parseInt(row), mine: parseInt(mine), nickname: user, peers })
+        dispatch({ type: START_GAME, cell: parseInt(cell), row: parseInt(row), mine: parseInt(mine), nickname: localStorage.getItem('nickname'), peers })
     }, [cell, row, mine])
 
 

@@ -4,9 +4,9 @@ import { PeerDataContext } from 'JSC/store'
 import { PEER_ROCK_PAPER_SCISSORS, PEER_CHAT, GAME_UPDATE, GAME_DEL } from "../../../Constants/peerDataTypes";
 
 export const getDataFromPeer = ({ peer, setPeerData }) => {
-    // const { setPeerData } = useContext(PeerDataContext);
     peer.on('data', jsonData => {
-        const { type, nickname, data } = JSON.parse(jsonData)
-        setPeerData({ type, nickname, data });
+        const { type, nickname, game, data } = JSON.parse(jsonData);
+        console.log("getDataFromPeer", { type, nickname, game, data })
+        setPeerData({ type, nickname, game, data });
     });
 }

@@ -15,7 +15,8 @@ const reducer = (state, action) => {
             const res = testDB.filter((i) => i.id === action.id && i.password === action.password);
             console.log("[DEBUG] : STORE LOGIN");
             if (res.length > 0) {
-                action.history.push("/chat");
+                action.history.push("/main");
+                localStorage.setItem('nickname', res[0].nickname);
                 return {
                     ...state,
                     user: res[0].nickname,
@@ -24,7 +25,7 @@ const reducer = (state, action) => {
             } else {
                 return {
                     ...state,
-                    user: "Guest"
+                    // user: "Guest"
                 };
             }
         default:

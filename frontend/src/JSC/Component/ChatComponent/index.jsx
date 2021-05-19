@@ -73,8 +73,8 @@ const UserAudio = ({ peers, peer }) => {
 function Index({ backgroundColor, height, width, ...props }) {
     // socket io.connect
     const socketRef = useRef();
-    const { user } = useContext(UserContext);
-    const myNickname = user;
+    // const { user } = useContext(UserContext);
+    const myNickname = localStorage.getItem('nickname');
     const { peerData, setPeerData } = useContext(PeerDataContext);
     const { peers, setPeers } = useContext(PeersContext);
     const { voicePeers, setVoicePeers } = useContext(VoicePeersContext);
@@ -96,21 +96,24 @@ function Index({ backgroundColor, height, width, ...props }) {
     const peersDestory = (peers, voicePeers) => {
         peers.forEach((peer) => {
             console.log("return useEffect peer destroy")
-            peer.peer.destroy()
+            // peer.peer.destroy()
+            peer.peer.on('close', () => console.log("delete"));
         });
+        setPeerData([]);
 
         voicePeers.forEach((voicePeer) => {
             voicePeer.peer.destroy()
         });
+        setVoicePeers([]);
     }
     useEffect(() => {
         socketRef.current = io.connect("/");
-        // if (Peer.WEBRTC_SUPPORT) {
-        connectDataPeer({ socketRef, roomID, peersRef, setPeers, myNickname, setPeerData });
-        connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname });
-        // } else {
-        //     console.log("webrtc not support!")
-        // }
+        if (Peer.WEBRTC_SUPPORT) {
+            connectDataPeer({ socketRef, roomID, peersRef, setPeers, myNickname, setPeerData });
+            connectVoicePeer({ socketRef, voicePeersRef, roomID: roomID + "-Voice", setVoicePeers, myNickname });
+        } else {
+            console.log("webrtc not support!")
+        }
 
         // 방법 1 테스트 해보기.
         // return () => peersRef.current.forEach(i => {
@@ -118,13 +121,14 @@ function Index({ backgroundColor, height, width, ...props }) {
         //     i.peer.removeAllListeners();
         //     i.peer.destroy();
         // })
+
         // 방법 2 테스트 해보기.
         // return () => {
         //     setPeers({});
         // }
-        // return () => {
-        //     peersDestory(peers, voicePeers)
-        // };
+        return () => {
+            peersDestory(peers, voicePeers)
+        };
     }, []);
 
 

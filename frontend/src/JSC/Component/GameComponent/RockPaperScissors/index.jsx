@@ -28,9 +28,9 @@ const App = () => {
         'paper': [-1, paper],
     };
 
-    
+
     const { peerData } = useContext(PeerDataContext);
-    const { user } = useContext(UserContext);
+    // const { user } = useContext(UserContext);
     const [selectData, setSelectData] = useState("");
     const [enemyData, setEnemyData] = useState();
     const { peers } = useContext(PeersContext);
@@ -53,7 +53,7 @@ const App = () => {
         else {
             tmp = "paper"
         }
-        success = sendDataToPeers(PEER_ROCK_PAPER_SCISSORS, { nickname: user, data: tmp, peers });
+        success = sendDataToPeers(PEER_ROCK_PAPER_SCISSORS, { nickname: localStorage.getItem('nickname'), data: tmp, peers });
         success === true && peers.length && setSelectData(tmp);
     }
     const PrintResult = () => {
