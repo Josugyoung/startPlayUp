@@ -3,12 +3,18 @@ import styled from 'styled-components';
 import { PEER_MINE_SEARCH } from 'JSC/Constants/peerDataTypes';
 import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
 import Yutfield from 'JSC/Component/GameComponent/Yut'
+import Horses from 'JSC/Component/GameComponent/Yut/Horses';
 
 export const UPDATE_TIMER = 'UPDATE_TIMER';
 export const START_GAME = 'START_GAME';
+export const RESUME_GAME = 'RESUME_GAME';
 export const THROW_YUT = 'THROW_YUT';
 export const SELECT_HORSE = 'SELECT_HORSE';
-export const PUT_HORSE = 'PUT_HORSE';
+export const MOVE_HORSE = 'MOVE_HORSE';
+export const TIME_OUT = 'TIME_OUT';
+export const NEXT_TURN = 'NEXT_TURN';
+export const DESELECT_HORSE = 'DESELECT_HORSE';
+
 // export const SEND_GAME_DATA = 'SEND_GAME_DATA';
 
 
@@ -26,7 +32,8 @@ export const CODE = {
 const initialState = {
     prevValue: 0,
     table: [
-        [1, 1, 2, 3, 4, 5] // 0
+        // 백도, 도, 개, 걸, 윷, 모,
+        [1, 1, 2, 3, 4, 5], // 0
         [29, 2, 3, 4, 5, 6], // 1
         [1, 3, 4, 5, 8, 9], // 2
         [2, 4, 5, 8, 9, 10], // 3
@@ -57,29 +64,45 @@ const initialState = {
         [24, 29, 30, 30, 30, 30], // 25
 
         // [prevValue > 7 ? 14 : 7, 27, 28, 29, 30, 30], // 26
-        [14, 27, 28, 29, 30, 30], // 26
+        [7, 27, 28, 29, 30, 30], // 26
 
         [26, 28, 29, 30, 30, 30], // 27
         [27, 29, 30, 30, 30, 30], // 28
-        [25, 30, 30, 30, 30, 30] // 29
+        [25, 30, 30, 30, 30, 30], // 29
+        [],
+
     ],
-    boardData: {
-        player1: {},
-        player2: {},
-        player3: {},
-        player4: {},
-    }, // 몇번 칸에 누구 말이 몇개 있는지 알 수 있음.
+    playerData: [
+        { nickname: '장석찬', color: 'red', horse: 4, horsePlace: {} },
+        { nickname: '정진', color: 'orange', horse: 4 },
+        // { nickname: 'player3', color: 'yellow' },
+        // { nickname: 'player4', color: 'green' },
+    ], // 몇번 칸에 누구 말이 몇개 있는지 알 수 있음.
     halted: true, // 내 순서 일때 false 그 외에는 true (정지)
     yutData: [], // 윷을 던졌을때 윷 또는 모가 나오거나, 상대 말을 잡을 때 추가
+    selectHorse: undefined, // 현재 선택한 말.
+    placeToMove: [],
     timer: 0, // 1초에 +1 씩 더해준다.
-    thorw_count: 0, // 윷을 던질 수 있는 횟수를 나타냄. // halted 와 useEffect 사용해서 대체할 수 있는지 테스트 // 
+    myThrowCount: 0, // 윷을 던질 수 있는 횟수를 나타냄. // halted 와 useEffect 사용해서 대체할 수 있는지 테스트 // 
     winner: [], // 이긴사람을 순서대로 추가함.
-    turn: [], // 전체 차례를 받아옴.
+    nowPlayer: 0, // 전체 차례를 받아옴.
 };
-
 const randomYut = () => {
-    const res = Math.floor(Math.random() * 6, 1)
-    return res;
+    const yutMatchTable = {
+        0: CODE.MO, // 모
+        1: CODE.DO, // 도
+        2: CODE.GAE, // 개
+        3: CODE.GIRL, // 걸
+        4: CODE.YUT  // 윷
+        // 0 : 백도
+    }
+    const arr = [];
+    for (let i = 0; i < 4; i++) {
+        arr.push(Math.floor(Math.random() * 2, 1))
+    }
+    let result = yutMatchTable[arr.reduce((a, b) => a + b)];
+    // 백도가 있으면 1 말고 0 출력
+    return result === 1 && arr[0] === 1 ? CODE.BACK_DO : result;
 }
 
 const reducer = (state, action) => {
@@ -92,75 +115,137 @@ const reducer = (state, action) => {
     // const { user } = useContext(UserContext);
     const { peers } = useContext(PeersContext);
     const nickname = localStorage.getItem('nickname');
+    console.log("action start : ", action.type)
     let yutData;
     let res;
     switch (action.type) {
         case UPDATE_TIMER:
             return { ...state, timer: state.timer + 1 };
         case START_GAME:
-            return { ...state, winner: state.winner + 1, halted: false };
+            return { ...state, myThrowCount: state.myThrowCount + 1, halted: false };
         case RESUME_GAME:
             return { ...state, halted: true };
         case THROW_YUT:
             // 윷 배열에 던져 나온 수를 추가해줌.
-            yutData = [...state.yutData];
-            yutData.push(randomYut);
-            return { ...state, yutData };
-        case PUT_HORSE:
+            if (state.myThrowCount > 0) {
+                const randomYutResult = randomYut();
+                let myThrowCount = state.myThrowCount;
+                yutData = [...state.yutData, randomYutResult];
+                if (!(randomYutResult === CODE.YUT || randomYutResult === CODE.MO)) {
+                    myThrowCount = myThrowCount - 1;
+                }
+                return { ...state, myThrowCount, yutData };
+            }
+            console.log("윷 던질 횟수(0이면 변동없음) : ", state.myThrowCount)
+            return { ...state }
+        case SELECT_HORSE:
+            console.log("말 선택 : ", action.index)
+            if (state.yutData.length === 0) { // 윷 던진 것이 아무것도 없으면 선택 안함.
+                return { ...state }
+            }
+            let placeToMove = state.table[action.index].filter((i, index) => state.yutData.includes(index));
+            console.log("말이 갈 수 있는 위치 : ", placeToMove);
+            return { ...state, selectHorse: action.index, placeToMove };
+        case MOVE_HORSE:
             // 사용할 윷 데이터가 들어오면 해당 윷 데이터를 삭제
             yutData = [...state.yutData];
             res = yutData.indexOf(action.useYutData)
             delete yutData[res]
             // 말을 위치로 옴김.
             return { ...state, yutData };
-        case TIME_OUT:
+        case DESELECT_HORSE:
+            return { ...state, selectHorse: undefined, placeToMove: [] }
+        case NEXT_TURN:
             // send next user
-            return;
-        // case SEND_GAME_DATA:
-
-        //     return state;
+            let nowPlayer = state.nowPlayer;
+            // if (nowPlayer === state.playerData.length) {
+            //     nowPlayer = 0;
+            // }
+            // else nowPlayer = nowPlayer + 1;
+            nowPlayer = nowPlayer === state.playerData.length ? 0 : nowPlayer + 1;
+            return { ...state, nowPlayer, timer: 0, halted: true };
         default:
             return state;
     }
 }
-const Styled = styled.div`
+// const StyledFlexDiv = styled.div`
+//     display:flex;
+//     flex-direction: column;
+//     justify-content: space-between;
+// `;
+
+const StyledYutfield = styled(Yutfield)`
     
 `;
-const MineSearch = (props,) => {
+
+
+const Yut = (props,) => {
     const [state, dispatch] = useReducer(reducer, initialState);
     const { peerData } = useContext(PeerDataContext);
-    const { boardData, halted, timer, winner } = state;
+    const { playerData, placeToMove, myThrowCount, selectHorse, yutData, table, halted, timer, winner } = state;
 
-    const value = useMemo(() => ({ boardData, halted, dispatch }), [boardData, halted]);
-
-    useEffect(() => {
-        let timer;
-        if (halted === false) {
-            timer = setInterval(() => {
-                dispatch({ type: UPDATE_TIMER })
-            }, 1000);
-        }
-        return () => {
-            clearInterval(timer);
-        }
-    }, [halted])
+    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, table, halted, dispatch }), [placeToMove, playerData, halted]);
 
     // useEffect(() => {
-    //     if (peerData.type === PEER_MINE_SEARCH) {
-    //         const { tableData, data, halted } = peerData.data;
-    //         dispatch({ type: "GetDataFromPeer", tableData, data, halted })
+    //     let timer;
+    //     if (halted === false) {
+    //         timer = setInterval(() => {
+    //             dispatch({ type: UPDATE_TIMER })
+    //         }, 1000);
     //     }
-    // }, [peerData])
+    //     return () => {
+    //         clearInterval(timer);
+    //     }
+    // }, [halted])
 
+    useEffect(() => {
+        console.log("debug state.yutData : ", state.yutData);
+    }, [yutData])
+
+    useEffect(() => {
+        if (timer > 30) {
+            dispatch({ type: NEXT_TURN })
+        }
+    }, [timer])
+
+    useEffect(() => {
+        if (yutData.length === 0 && myThrowCount === 0) {
+            dispatch({ type: NEXT_TURN })
+        }
+    }, [yutData, myThrowCount])
+
+    const StyleDiv = styled.div`
+        display:flex;
+        height:30px;
+        flex-direction: row;
+        margin:10px;
+    `;
+    const OnContextMenu = () => (e) => {
+        e.preventDefault();
+        console.log('우클!');
+        dispatch({ type: DESELECT_HORSE })
+    }
     return (
-        <div>
+        <div onContextMenu={OnContextMenu()}>
             <boardContext.Provider value={value}>
                 <div>{timer}</div>
-                <Yutfield />
+                <Yutfield width />
                 <div>{winner}</div>
+                <button onClick={() => dispatch({ type: START_GAME })}>게임 시작</button>
+                <button onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</button>
+                <StyleDiv>말이 갈 수 있는 수 : {yutData.map((i) => <div> {i}</div>)}</StyleDiv>
+                <div>윷 던질 수 있는 횟수 : {myThrowCount}</div>
+                <div>
+                    {playerData.map((i) => <div>
+                        <div>닉네임 : {i.nickname}</div>
+                        <div style={{ "height": "60px" }} >
+                            말의 갯수 : <Horses color={i.color} horses={i.horse} />
+                        </div>
+                    </div>)}
+                </div>
             </boardContext.Provider>
-        </div>
+        </div >
     )
 }
 
-export default MineSearch;
+export default Yut;

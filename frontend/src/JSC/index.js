@@ -13,6 +13,7 @@ import Yut from 'JSC/Container/Yut';
 const GamePage = styled.div`
     display:flex;
     flex-direction:row;
+    justify-content: space-between;
 `;
 
 const TemporaryMain = () => {
