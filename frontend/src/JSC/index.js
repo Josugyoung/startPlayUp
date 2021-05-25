@@ -7,8 +7,8 @@ import ChatComponent from "./Component/ChatComponent";
 import RockPaperScissors from "./Component/GameComponent/RockPaperScissors";
 import { BrowserRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import MineSearch from "JSC/Container/MineSearch";
-import Yut from 'JSC/Container/Yut';
+import MineSearch from "JSC/Container/GameContainer/MineSearch";
+import Yut from 'JSC/Container/GameContainer/Yut';
 
 const GamePage = styled.div`
     display:flex;
@@ -29,8 +29,10 @@ function app() {
     const { isAuthenticated } = useContext(UserContext);
     return (
         <BrowserRouter>
+
+            {/* 원래 코드 주석 처리 ( 로그인 표시 X) */}
             {/* <Route path="/" component={GlobalContainer} /> */}
-            <Route exact path="/" component={LoginPageContainer} />
+            {/* <Route exact path="/" component={LoginPageContainer} />
             {isAuthenticated && <Route exact path="/main" component={TemporaryMain} />}
             {isAuthenticated && <Route exact path="/RockPaperScissors" render={() => <GamePage>
                 <RockPaperScissors />
@@ -40,6 +42,20 @@ function app() {
                 <MineSearch />
             </GamePage>} />}
             {isAuthenticated && <Route exact path="/Yut" render={() => <GamePage>
+                <Yut />
+                <ChatComponent />
+            </GamePage>} />} */}
+
+
+            {<Route path="/" component={TemporaryMain} />}
+            {<Route exact path="/RockPaperScissors" render={() => <GamePage>
+                <RockPaperScissors />
+                <ChatComponent />
+            </GamePage>} />}
+            {<Route exact path="/MineSearch" render={() => <GamePage>
+                <MineSearch />
+            </GamePage>} />}
+            {<Route exact path="/Yut" render={() => <GamePage>
                 <Yut />
                 <ChatComponent />
             </GamePage>} />}

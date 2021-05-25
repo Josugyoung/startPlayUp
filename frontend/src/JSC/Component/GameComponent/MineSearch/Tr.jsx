@@ -1,6 +1,6 @@
 import React, { useContext, memo } from 'react';
 import Td from './Td';
-import { TableContext } from 'JSC/Container/MineSearch';
+import { TableContext } from 'JSC/Container/GameContainer/MineSearch';
 import styled from 'styled-components';
 
 
