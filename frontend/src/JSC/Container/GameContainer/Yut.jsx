@@ -2,15 +2,20 @@ import React, { useReducer, useEffect, createContext, useMemo, memo, useContext 
 import styled from 'styled-components';
 import { PEER_MINE_SEARCH } from 'JSC/Constants/peerDataTypes';
 import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
-import Yutfield from 'JSC/Component/GameComponent/Yut'
+import Yutfield from 'JSC/Component/GameComponent/Yut/Yutfield'
 import Horses from 'JSC/Component/GameComponent/Yut/Horses';
+import YutPlayersSection from 'JSC/Component/GameComponent/Yut/YutPlayersSection';
 
 export const UPDATE_TIMER = 'UPDATE_TIMER';
 export const START_GAME = 'START_GAME';
 export const RESUME_GAME = 'RESUME_GAME';
 export const THROW_YUT = 'THROW_YUT';
 export const SELECT_HORSE = 'SELECT_HORSE';
+export const MOVE_FIRST_HORSE = 'MOVE_FIRST_HORSE';
+export const MOVE_HORSE_USE_PLACE = 'MOVE_HORSE_USE_PLACE';
+export const MOVE_HORSE_USE_YUTDATA = 'MOVE_HORSE_USE_YUTDATA';
 export const MOVE_HORSE = 'MOVE_HORSE';
+export const UPDATE_GOAL = 'UPDATE_GOAL'
 export const TIME_OUT = 'TIME_OUT';
 export const NEXT_TURN = 'NEXT_TURN';
 export const DESELECT_HORSE = 'DESELECT_HORSE';
@@ -31,63 +36,23 @@ export const CODE = {
 
 const initialState = {
     prevValue: 0,
-    // table: [
-    //     // 백도, 도, 개, 걸, 윷, 모,
-    //     [1, 1, 2, 3, 4, 5], // 0
-    //     [29, 2, 3, 4, 5, 6], // 1
-    //     [1, 3, 4, 5, 8, 9], // 2
-    //     [2, 4, 5, 8, 9, 10], // 3
-    //     [3, 5, 8, 9, 10, 11], // 4
-    //     [4, 6, 7, 26, 21, 20], // 5
-    //     [5, 7, 26, 21, 20, 19], // 6
-    //     [6, 26, 21, 20, 19, 22],// 7
-    //     [5, 9, 10, 11, 12, 15],// 8
-    //     [8, 10, 11, 12, 15, 16],// 9
-    //     [9, 11, 12, 15, 16, 17],// 10
-    //     [10, 12, 15, 16, 17, 18],// 11
-    //     [11, 13, 14, 26, 27, 28],// 12
-    //     [12, 14, 26, 27, 28, 29],// 13
-    //     [13, 26, 27, 28, 29, 30],// 14
-    //     [12, 16, 17, 18, 19, 22],// 15
-    //     [15, 17, 18, 19, 22, 23],// 16
-    //     [16, 18, 19, 22, 23, 24],// 17
-    //     [17, 19, 22, 23, 24, 25],// 18
-
-    //     // [prevValue > 15 && prevValue < 19 ? 18 : 20, 22, 23, 24, 25, 29],// 19
-    //     [18, 22, 23, 24, 25, 29],// 19
-
-    //     [21, 19, 22, 23, 24, 25],// 20
-    //     [26, 20, 19, 22, 23, 24],// 21
-    //     [19, 23, 24, 25, 29, 30], // 22
-    //     [22, 24, 25, 29, 30, 30], // 23
-    //     [23, 25, 29, 30, 30, 30], // 24
-    //     [24, 29, 30, 30, 30, 30], // 25
-
-    //     // [prevValue > 7 ? 14 : 7, 27, 28, 29, 30, 30], // 26
-    //     [7, 27, 28, 29, 30, 30], // 26
-
-    //     [26, 28, 29, 30, 30, 30], // 27
-    //     [27, 29, 30, 30, 30, 30], // 28
-    //     [25, 30, 30, 30, 30, 30], // 29
-    //     [],
-
-    // ],
     table: {
         10: [11, 13, 25, 27, 29, 30],
         20: [21, 23, 25],
         25: [37, 39, 40],
-        40: ['finish']
+        40: [42]
     },
     playerData: [
-        { nickname: '장석찬', color: 'red', horse: 4, horsePlace: {} },
-        { nickname: '정진', color: 'orange', horse: 4 },
+        { nickname: '장석찬', color: 'red', horses: 0, goal: 2 },
+        { nickname: '정진', color: 'orange', horses: 4, goal: 0 },
         // { nickname: 'player3', color: 'yellow' },
         // { nickname: 'player4', color: 'green' },
     ], // 몇번 칸에 누구 말이 몇개 있는지 알 수 있음.
+    horsePosition: { 2: { player: 0, horses: 2 } },
     halted: true, // 내 순서 일때 false 그 외에는 true (정지)
     yutData: [], // 윷을 던졌을때 윷 또는 모가 나오거나, 상대 말을 잡을 때 추가
     selectHorse: undefined, // 현재 선택한 말.
-    placeToMove: [],
+    placeToMove: {},
     timer: 0, // 1초에 +1 씩 더해준다.
     myThrowCount: 0, // 윷을 던질 수 있는 횟수를 나타냄. // halted 와 useEffect 사용해서 대체할 수 있는지 테스트 // 
     winner: [], // 이긴사람을 순서대로 추가함.
@@ -115,7 +80,7 @@ const randomYut = () => {
 const findDataInObject = (tableObj, index) => {
     let keys = Object.keys(tableObj);
     for (let i = 0; i < keys.length - 1; i++) {
-        let result = table[keys[i]].indexOf(index);
+        let result = tableObj[keys[i]].indexOf(index);
         if (result !== -1) {
             console.log("키 인덱스 : ", keys[i], result)
             return { key: keys[i], indexOf: result }
@@ -132,8 +97,8 @@ const findPlace = (shortcut, table, index, add) => {
         if (add === CODE.BACK_DO) {
             return index - 2;
         }
-
-        len = table[index].length;
+        let len = table[index].length;
+        console.log('len : ', len)
         if (add > len) { // 현재 배열의 길이보다 길다면 해당 배열의 끝까지 간다음에 다시한번 더 findPlace를 돌림 (재귀함수)
             return findPlace(shortcut, table, table[index][len - 1], add - len);
         }
@@ -150,24 +115,47 @@ const findPlace = (shortcut, table, index, add) => {
                 console.log("%2 with key")
                 return key
             }
-            return findPlace(shortcut, key, indexOf - 1);
+            return findPlace(shortcut, table, key, indexOf - 1);
         }
 
-        return findPlace(shortcut, key, add + indexOf + 1)
+        return findPlace(shortcut, table, key, add + indexOf + 1)
     }
     else {
         // 40 이상 
+        let tmp;
         if (add === CODE.BACK_DO) {
-            return index - 2;
+            tmp = index - 2
+            if (tmp === 0) {
+                tmp = 40;
+            }
+            return tmp;
         }
 
-        let tmp = index;
+        tmp = index;
         tmp = tmp + add * 2;
         if (tmp > 40) {
             tmp = table[40];
         }
         return tmp;
     }
+}
+
+// 특정 윷 데이터를 삭제
+const deleteYutDataOfOne = (yutData, placeToMove, index) => {
+    let res = yutData.indexOf(placeToMove[index]);
+    console.log(res)
+    console.log('yutData : ', yutData)
+    yutData.splice(res, 1);
+    console.log('yutData : ', yutData)
+    return [...yutData];
+}
+
+const checkSelectState = (selectHorse, placeToMove, index) => {
+    if (selectHorse === undefined || !placeToMove.hasOwnProperty(String(index))) {
+        console.log("out of MOVE_HORSE");
+        return true;
+    }
+    return false;
 }
 
 
@@ -183,7 +171,10 @@ const reducer = (state, action) => {
     const nickname = localStorage.getItem('nickname');
     console.log("action start : ", action.type)
     let yutData;
-    let res;
+    let horsePosition;
+    let nowPlayer;
+    let playerData;
+    let goal;
     switch (action.type) {
         case UPDATE_TIMER:
             return { ...state, timer: state.timer + 1 };
@@ -212,26 +203,79 @@ const reducer = (state, action) => {
             // let placeToMove = state.table[action.index].filter((i, index) => state.yutData.includes(index));
             let arr = [...new Set(state.yutData)];
             console.log("arr set yutData : ", arr);
-            let placeToMove = [];
+            let placeToMove = {};
             arr.forEach((i) => {
                 console.log(i)
                 console.log("findPlace : ", findPlace(0, state.table, action.index, i))
-                placeToMove.push(findPlace(0, state.table, action.index, i))
+                // placeToMove.push({ yut: i, index: findPlace(0, state.table, action.index, i) })
+                placeToMove[findPlace(0, state.table, action.index, i)] = i
             });
             console.log("말이 갈 수 있는 위치 : ", placeToMove);
             return { ...state, selectHorse: action.index, placeToMove };
-        case MOVE_HORSE:
+
+        case MOVE_FIRST_HORSE:
+            // 선택한 말이 없는 상태에서 눌렸거나 해당 값이 없으면 말을 이동하지 않음.
+            if (checkSelectState(state.selectHorse, state.placeToMove, action.index)) return { ...state };
             // 사용할 윷 데이터가 들어오면 해당 윷 데이터를 삭제
             yutData = [...state.yutData];
-            res = yutData.indexOf(action.useYutData)
-            delete yutData[res]
-            // 말을 위치로 옴김.
-            return { ...state, yutData };
+            yutData.splice(yutData.indexOf(state.placeToMove[action.index]), 1);
+            // 말 이동 관련 코드
+            // 만약에 selectHorse 가 0 이라면 (윷 판에 말이 없는 경우)
+            horsePosition = { ...state.horsePosition };
+            // let nowPlayer = horsePosition[action.index]['player']
+            nowPlayer = 1
+            playerData = state.playerData;
+            playerData[nowPlayer].horses--;
+            horsePosition[action.index] = { player: nowPlayer, horses: 1 }
+            return { ...state, yutData, playerData, horsePosition, selectHorse: undefined, placeToMove: {} };
+
+
+        case MOVE_HORSE:
+            // 선택한 말이 없는 상태에서 눌렸거나 해당 값이 없으면 말을 이동하지 않음.
+            if (checkSelectState(state.selectHorse, state.placeToMove, action.index)) return { ...state };
+
+            // 사용할 윷 데이터가 들어오면 해당 윷 데이터를 삭제
+            // yutData = deleteYutDataOfOne(state.yutData, state.placeToMove, action.index); // 오류나는데 이유 확인 해야함. 
+            yutData = [...state.yutData];
+            yutData.splice(yutData.indexOf(state.placeToMove[action.index]), 1);
+
+            // 말 이동 관련 코드
+            // 만약에 selectHorse 가 0 이라면 (윷 판에 말이 없는 경우)
+            console.log('yutData', yutData)
+            horsePosition = { ...state.horsePosition };
+            horsePosition[action.index] = horsePosition[state.selectHorse]
+            delete horsePosition[state.selectHorse]
+            console.log('yutData', yutData)
+
+            return { ...state, yutData, horsePosition, selectHorse: undefined, placeToMove: {} };
+        case UPDATE_GOAL:
+            // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
+            // 골인지점에 있다면 점수 올리고 말 삭제
+            if (state.horsePosition.hasOwnProperty(42)) {
+                playerData = [...state.playerData]
+                horsePosition = { ...state.horsePosition };
+                nowPlayer = horsePosition[42].player;
+                console.log("test : ", state.playerData)
+                console.log("test : ", horsePosition[42].horses,)
+                goal = playerData[nowPlayer].goal // 플레이어 데이터의 goal과 
+                    + horsePosition[42].horses // 현재 골인지점에 있는 말들을 더함.
+                delete horsePosition[42]; // 골인 지점 말 삭제
+                playerData[nowPlayer] = { ...playerData[nowPlayer], goal }
+                console.log("test : ", playerData)
+                return { ...state, horsePosition, playerData }
+            }
+            else {
+                return { ...state }
+            }
+
+            playerData = [...state.playerData];
+            playerData[action.player] = { playerData }
+            return { ...state, playerData };
         case DESELECT_HORSE:
-            return { ...state, selectHorse: undefined, placeToMove: [] }
+            return { ...state, selectHorse: undefined, placeToMove: {} };
         case NEXT_TURN:
             // send next user
-            let nowPlayer = state.nowPlayer;
+            nowPlayer = state.nowPlayer;
             // if (nowPlayer === state.playerData.length) {
             //     nowPlayer = 0;
             // }
@@ -248,18 +292,15 @@ const reducer = (state, action) => {
 //     justify-content: space-between;
 // `;
 
-const StyledYutfield = styled(Yutfield)`
-    
-`;
-
 
 const Yut = (props,) => {
     const [state, dispatch] = useReducer(reducer, initialState);
     const { peerData } = useContext(PeerDataContext);
-    const { playerData, placeToMove, myThrowCount, selectHorse, yutData, table, halted, timer, winner } = state;
+    const { playerData, placeToMove, myThrowCount, selectHorse, yutData, table, halted, timer, winner, horsePosition } = state;
 
-    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, table, halted, dispatch }), [placeToMove, playerData, halted]);
+    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, table, halted, dispatch, horsePosition, myThrowCount }), [selectHorse, myThrowCount, placeToMove, horsePosition, playerData, yutData, halted]);
 
+    // 타이머 돌리기
     // useEffect(() => {
     //     let timer;
     //     if (halted === false) {
@@ -272,21 +313,29 @@ const Yut = (props,) => {
     //     }
     // }, [halted])
 
-    useEffect(() => {
-        console.log("debug state.yutData : ", state.yutData);
-    }, [yutData])
+    // useEffect(() => {
+    //     console.log("debug state.yutData : ", state.yutData);
+    // }, [yutData])
+
+    // 타이머가 30 초가 넘었을 때 순서 넘기기
+    // useEffect(() => {
+    //     if (timer > 30) {
+    //         dispatch({ type: NEXT_TURN })
+    //     }
+    // }, [timer])
+
+    // 순서 넘기기
+    // useEffect(() => {
+    //     if (yutData.length === 0 && myThrowCount === 0) {
+    //         dispatch({ type: NEXT_TURN })
+    //     }
+    // }, [yutData, myThrowCount])
 
     useEffect(() => {
-        if (timer > 30) {
-            dispatch({ type: NEXT_TURN })
-        }
-    }, [timer])
-
-    useEffect(() => {
-        if (yutData.length === 0 && myThrowCount === 0) {
-            dispatch({ type: NEXT_TURN })
-        }
-    }, [yutData, myThrowCount])
+        // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
+        // 골인지점에 있다면 점수 올리고 말 삭제
+        dispatch({ type: UPDATE_GOAL })
+    }, [horsePosition])
 
     const StyleDiv = styled.div`
         display:flex;
@@ -294,31 +343,21 @@ const Yut = (props,) => {
         flex-direction: row;
         margin:10px;
     `;
-    const OnContextMenu = () => (e) => {
+
+    const OnContextMenu = (e) => {
         e.preventDefault();
         console.log('우클!');
         dispatch({ type: DESELECT_HORSE })
     }
+
     return (
-        <div onContextMenu={OnContextMenu()}>
-            <boardContext.Provider value={value}>
+        <boardContext.Provider value={value}>
+            <div onContextMenu={(e) => OnContextMenu(e)}>
                 <div>{timer}</div>
-                <Yutfield width />
-                <div>{winner}</div>
-                <button onClick={() => dispatch({ type: START_GAME })}>게임 시작</button>
-                <button onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</button>
-                <StyleDiv>말이 갈 수 있는 수 : {yutData.map((i) => <div> {i}</div>)}</StyleDiv>
-                <div>윷 던질 수 있는 횟수 : {myThrowCount}</div>
-                <div>
-                    {playerData.map((i) => <div>
-                        <div>닉네임 : {i.nickname}</div>
-                        <div style={{ "height": "60px" }} >
-                            말의 갯수 : <Horses color={i.color} horses={i.horse} />
-                        </div>
-                    </div>)}
-                </div>
-            </boardContext.Provider>
-        </div >
+                <Yutfield />
+                <YutPlayersSection />
+            </div >
+        </boardContext.Provider >
     )
 }
 

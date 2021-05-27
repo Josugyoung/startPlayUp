@@ -3,7 +3,7 @@ import React, { useContext, useState, memo, useEffect } from 'react';
 import styled from 'styled-components';
 
 
-const Horse = styled.button`
+const Horse = styled.div`
         display:flex;
         flex-direction: row;
         width:20px;
@@ -25,16 +25,16 @@ const StyledButton = styled.button`
 `;
 
 
-const App = ({ horses, color }) => {
+const App = ({ horses, color, index }) => {
     const { dispatch, table } = useContext(boardContext);
-    const clickHorseHandler = (index) => (e) => {
+    const clickHorseHandler = (e, index) => {
         e.preventDefault();
         dispatch({ type: SELECT_HORSE, index })
         console.log("[debug] : ", index, table[index]);
     }
     return (
         <div>
-            <div onClick={clickHorseHandler(0)} >
+            <div onClick={(e) => clickHorseHandler(e, index)} >
                 {[...Array(horses)].map((tp, index) =>
                     <Horse key={index} color={color} index={index} />
                 )}

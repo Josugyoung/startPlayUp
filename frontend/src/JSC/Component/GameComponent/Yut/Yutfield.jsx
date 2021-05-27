@@ -1,6 +1,7 @@
-import { THROW_YUT, SELECT_HORSE, MOVE_HORSE, boardContext } from 'JSC/Container/GameContainer/Yut';
+import { THROW_YUT, MOVE_HORSE, MOVE_FIRST_HORSE, boardContext } from 'JSC/Container/GameContainer/Yut';
 import React, { useContext, useState, memo, useEffect } from 'react';
 import styled from 'styled-components';
+import Horses from 'JSC/Component/GameComponent/Yut/Horses'
 
 const GridContainer = styled.div`
     /* width:300px;
@@ -22,7 +23,7 @@ const PlaceButton = styled.button`
     border-radius: 100%;
     border: solid 1px black;
     padding:10px;
-    cursor:${props => props.color !== undefined && props.color};
+    ${props => props.color !== undefined && "cursor:pointer;"};
     /* top: 40px;
     left: 40px; */
 `;
@@ -38,40 +39,6 @@ const HorseButton = styled.button`
 `;
 
 const App = () => {
-    // const gridTable = [
-    //     { row: 20, column: 20 }, // 0
-    //     { row: 20, column: 16 }, // 1
-    //     { row: 20, column: 12 }, // 2
-    //     { row: 20, column: 8 }, // 3
-    //     { row: 20, column: 4 }, // 4
-    //     { row: 20, column: 0 }, // 5
-    //     { row: 16, column: 4 }, // 6
-    //     { row: 13, column: 7 }, // 7
-    //     { row: 16, column: 0 }, // 8
-    //     { row: 12, column: 0 }, // 9
-    //     { row: 8, column: 0 }, // 10
-    //     { row: 4, column: 0 }, // 11
-    //     { row: 0, column: 0 }, // 12
-    //     { row: 4, column: 4 }, // 13
-    //     { row: 7, column: 7 }, // 14
-    //     { row: 0, column: 4 }, // 15
-    //     { row: 0, column: 8 }, // 16
-    //     { row: 0, column: 12 }, // 17
-    //     { row: 0, column: 16 }, // 18
-    //     { row: 0, column: 20 }, // 19
-    //     { row: 4, column: 16 }, // 20
-    //     { row: 7, column: 13 }, // 21
-    //     { row: 4, column: 20 }, // 22
-    //     { row: 8, column: 20 }, // 23
-    //     { row: 12, column: 20 }, // 24
-    //     { row: 16, column: 20 }, // 25
-    //     { row: 10, column: 10 }, // 26
-    //     { row: 13, column: 13 }, // 27
-    //     { row: 16, column: 16 }, // 28
-    //     { row: 20, column: 20 }, // 29
-    //     { row: 16, column: 10 }, // 30
-    // ]
-
     const gridTable = [
         { index: 40, row: 20, column: 20 },
         { index: 2, row: 20, column: 16 },
@@ -103,8 +70,9 @@ const App = () => {
         { index: 37, row: 13, column: 13 },
         { index: 39, row: 16, column: 16 },
         { index: 40, row: 20, column: 20 },
+        { index: 42, row: 16, column: 10 },
     ]
-    const { table, yutData, placeToMove, dispatch } = useContext(boardContext);
+    const { table, selectHorse, yutData, playerData, horsePosition, placeToMove, dispatch } = useContext(boardContext);
     // const [selectPlace, setSelectPlace] = useState("");
     const clickHorseHandler = (index) => (e) => {
         e.preventDefault();
@@ -112,20 +80,35 @@ const App = () => {
         // console.log("[debug] : ", index, table[index]);
     }
     const changeItemColorHandler = (index) => {
-        return placeToMove.includes(index) && 'yellow'
-    }
-    const includesPlaceToMove = (index) => placeToMove.includes(index)
+        // return placeToMove.map((i) => i.index).includes(index) ? 'yellow' : 'white'
+        // change placeToMove index를 앞으로 빼서 key 값으로 바꿈.
+        return Object.keys(placeToMove).includes(String(index)) ? 'yellow' : 'white'
 
-    const moveHorse = (index) => (e) => {
+    }
+    const moveHorse = (e, index) => {
         e.preventDefault();
-        dispatch({ type: MOVE_HORSE, index });
+        if (selectHorse === 0) {
+            console.log("MOVE_FIRST_HORSE")
+            dispatch({ type: MOVE_FIRST_HORSE, index })
+        }
+        else {
+            console.log("MOVE_HORSE")
+            dispatch({ type: MOVE_HORSE, index });
+        }
+    }
+    const test = () => {
+        console.log("test");
     }
     return (
         <div>
-            <GridContainer class="container">
+            <GridContainer className="container">
                 {gridTable.map((i, index) =>
-                    <GridPlace index={i.index} row={i.column} column={i.row}>
-                        <PlaceButton onclick={() => moveHorse(i.index)} color={changeItemColorHandler(i.index)}>{i.index}</PlaceButton>
+                    <GridPlace key={index} index={i.index} row={i.column} column={i.row}>
+                        <PlaceButton key={index} onClick={(e) => moveHorse(e, i.index)} color={changeItemColorHandler(i.index)}>{i.index}</PlaceButton>
+                        {horsePosition[i.index] !== undefined &&
+                            <Horses color={playerData[horsePosition[i.index]['player']]['color']} index={i.index} horses={horsePosition[i.index]['horses']}>
+                                {i.index}
+                            </Horses>}
                     </GridPlace>)
                 }
             </GridContainer >
