@@ -14,10 +14,13 @@ const StyleDiv = styled.div`
 const App = () => {
     const { myThrowCount, yutData, playerData, dispatch } = useContext(boardContext);
     // const [selectPlace, setSelectPlace] = useState("");
+    const test = () => {
+        dispatch({ type: START_GAME })
+    }
 
     return (
         <div>
-            <button onClick={() => dispatch({ type: START_GAME })}>게임 시작</button>
+            <button onClick={test}>게임 시작</button>
             <button onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</button>
             <button onClick={() => console.log(yutData)}>윷 데이터</button>
             <StyleDiv>말이 갈 수 있는 수 :

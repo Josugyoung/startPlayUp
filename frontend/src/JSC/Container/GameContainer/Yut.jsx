@@ -317,25 +317,25 @@ const Yut = (props,) => {
     //     console.log("debug state.yutData : ", state.yutData);
     // }, [yutData])
 
-    // 타이머가 30 초가 넘었을 때 순서 넘기기
+    // // 타이머가 30 초가 넘었을 때 순서 넘기기
     // useEffect(() => {
     //     if (timer > 30) {
     //         dispatch({ type: NEXT_TURN })
     //     }
     // }, [timer])
 
-    // 순서 넘기기
+    // // 순서 넘기기
     // useEffect(() => {
     //     if (yutData.length === 0 && myThrowCount === 0) {
     //         dispatch({ type: NEXT_TURN })
     //     }
     // }, [yutData, myThrowCount])
 
-    useEffect(() => {
-        // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
-        // 골인지점에 있다면 점수 올리고 말 삭제
-        dispatch({ type: UPDATE_GOAL })
-    }, [horsePosition])
+    // useEffect(() => {
+    //     // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
+    //     // 골인지점에 있다면 점수 올리고 말 삭제
+    //     dispatch({ type: UPDATE_GOAL })
+    // }, [horsePosition])
 
     const StyleDiv = styled.div`
         display:flex;
