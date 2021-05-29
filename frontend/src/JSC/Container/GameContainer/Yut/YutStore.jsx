@@ -1,10 +1,7 @@
 import React, { useReducer, useEffect, createContext, useMemo, memo, useContext } from 'react';
 import styled from 'styled-components';
-import { PEER_MINE_SEARCH } from 'JSC/Constants/peerDataTypes';
 import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
-import Yutfield from 'JSC/Component/GameComponent/Yut/Yutfield'
-import Horses from 'JSC/Component/GameComponent/Yut/Horses';
-import YutPlayersSection from 'JSC/Component/GameComponent/Yut/YutPlayersSection';
+import { findDataInObject, findPlace, checkSelectState } from './YutFunctionModule.js'
 
 export const UPDATE_TIMER = 'UPDATE_TIMER';
 export const START_GAME = 'START_GAME';
@@ -44,7 +41,8 @@ const initialState = {
     },
     playerData: [
         { nickname: '장석찬', color: 'red', horses: 0, goal: 2 },
-        { nickname: '정진', color: 'orange', horses: 4, goal: 0 },
+        { nickname: '정진', color: 'orange', horses: 3, goal: 0 },
+        { nickname: '이종찬', color: 'blue', horses: 4, goal: 0 },
         // { nickname: 'player3', color: 'yellow' },
         // { nickname: 'player4', color: 'green' },
     ], // 몇번 칸에 누구 말이 몇개 있는지 알 수 있음.
@@ -76,89 +74,6 @@ const randomYut = () => {
     return result === 1 && arr[0] === 1 ? CODE.BACK_DO : result;
 }
 
-
-const findDataInObject = (tableObj, index) => {
-    let keys = Object.keys(tableObj);
-    for (let i = 0; i < keys.length - 1; i++) {
-        let result = tableObj[keys[i]].indexOf(index);
-        if (result !== -1) {
-            console.log("키 인덱스 : ", keys[i], result)
-            return { key: keys[i], indexOf: result }
-        }
-    }
-    return { key: -1, indexOf: -1 }
-}
-
-const findPlace = (shortcut, table, index, add) => {
-    if (index % 5 === 0 && table[index] !== undefined) {
-        // index를 5로 나누었을 때  나머지는 0임
-        // table 객체에 정의 되어있음
-        // index 가 0 이 아님. 
-        if (add === CODE.BACK_DO) {
-            return index - 2;
-        }
-        let len = table[index].length;
-        console.log('len : ', len)
-        if (add > len) { // 현재 배열의 길이보다 길다면 해당 배열의 끝까지 간다음에 다시한번 더 findPlace를 돌림 (재귀함수)
-            return findPlace(shortcut, table, table[index][len - 1], add - len);
-        }
-        else {
-            return table[index][add - 1];
-        }
-    }
-    else if (index % 2 === 1) { // 
-        let { key, indexOf } = findDataInObject(table, index);
-
-        if (add === CODE.BACK_DO) { // 백도가 들어오면
-            console.log("%2 indexOf", indexOf, key)
-            if (indexOf === 0) {
-                console.log("%2 with key")
-                return key
-            }
-            return findPlace(shortcut, table, key, indexOf - 1);
-        }
-
-        return findPlace(shortcut, table, key, add + indexOf + 1)
-    }
-    else {
-        // 40 이상 
-        let tmp;
-        if (add === CODE.BACK_DO) {
-            tmp = index - 2
-            if (tmp === 0) {
-                tmp = 40;
-            }
-            return tmp;
-        }
-
-        tmp = index;
-        tmp = tmp + add * 2;
-        if (tmp > 40) {
-            tmp = table[40];
-        }
-        return tmp;
-    }
-}
-
-// 특정 윷 데이터를 삭제
-const deleteYutDataOfOne = (yutData, placeToMove, index) => {
-    let res = yutData.indexOf(placeToMove[index]);
-    console.log(res)
-    console.log('yutData : ', yutData)
-    yutData.splice(res, 1);
-    console.log('yutData : ', yutData)
-    return [...yutData];
-}
-
-const checkSelectState = (selectHorse, placeToMove, index) => {
-    if (selectHorse === undefined || !placeToMove.hasOwnProperty(String(index))) {
-        console.log("out of MOVE_HORSE");
-        return true;
-    }
-    return false;
-}
-
-
 const reducer = (state, action) => {
     //1. 1번 피어의 크롬이 렉걸려서 잠깐 멈췄다가 돌아옴 (상대방이랑 타이머 동기화 안됨 상황임)
     //2. 2번 피어로 차례로 넘어감
@@ -166,9 +81,6 @@ const reducer = (state, action) => {
     //4. 1번 피어와 2번피어는 데이터 입력함
     //5. 1번 피어와 2번피어의 데이터를 은 양쪽에서 동시에 받음.
     //시간동기화는 필요하지 않나?
-    // const { user } = useContext(UserContext);
-    const { peers } = useContext(PeersContext);
-    const nickname = localStorage.getItem('nickname');
     console.log("action start : ", action.type)
     let yutData;
     let horsePosition;
@@ -224,10 +136,12 @@ const reducer = (state, action) => {
             horsePosition = { ...state.horsePosition };
             // let nowPlayer = horsePosition[action.index]['player']
             nowPlayer = 1
-            playerData = state.playerData;
-            playerData[nowPlayer].horses--;
+            const test = [...state.playerData];
+            // console.log(test)
+            // test[1].horses = test[1].horses - 1;
+            // console.log(test)
             horsePosition[action.index] = { player: nowPlayer, horses: 1 }
-            return { ...state, yutData, playerData, horsePosition, selectHorse: undefined, placeToMove: {} };
+            return { ...state, yutData, playerData: test, horsePosition, selectHorse: undefined, placeToMove: {} };
 
 
         case MOVE_HORSE:
@@ -268,9 +182,9 @@ const reducer = (state, action) => {
                 return { ...state }
             }
 
-            playerData = [...state.playerData];
-            playerData[action.player] = { playerData }
-            return { ...state, playerData };
+        // playerData = [...state.playerData];
+        // playerData[action.player] = { playerData }
+        // return { ...state, playerData };
         case DESELECT_HORSE:
             return { ...state, selectHorse: undefined, placeToMove: {} };
         case NEXT_TURN:
@@ -286,19 +200,11 @@ const reducer = (state, action) => {
             return state;
     }
 }
-// const StyledFlexDiv = styled.div`
-//     display:flex;
-//     flex-direction: column;
-//     justify-content: space-between;
-// `;
 
-
-const Yut = (props,) => {
+const YutStore = ({ children }) => {
+    // dispatch는 실행중 변경하지 않기에 useMemo를 통해 제함.
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { peerData } = useContext(PeerDataContext);
     const { playerData, placeToMove, myThrowCount, selectHorse, yutData, table, halted, timer, winner, horsePosition } = state;
-
-    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, table, halted, dispatch, horsePosition, myThrowCount }), [selectHorse, myThrowCount, placeToMove, horsePosition, playerData, yutData, halted]);
 
     // 타이머 돌리기
     // useEffect(() => {
@@ -331,34 +237,20 @@ const Yut = (props,) => {
     //     }
     // }, [yutData, myThrowCount])
 
-    // useEffect(() => {
-    //     // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
-    //     // 골인지점에 있다면 점수 올리고 말 삭제
-    //     dispatch({ type: UPDATE_GOAL })
-    // }, [horsePosition])
+    useEffect(() => {
+        console.log("playerData : ", playerData)
+    }, [playerData])
 
-    const StyleDiv = styled.div`
-        display:flex;
-        height:30px;
-        flex-direction: row;
-        margin:10px;
-    `;
-
-    const OnContextMenu = (e) => {
-        e.preventDefault();
-        console.log('우클!');
-        dispatch({ type: DESELECT_HORSE })
-    }
+    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, halted, dispatch, horsePosition, myThrowCount }), [selectHorse, myThrowCount, placeToMove, horsePosition, playerData, yutData, halted]);
 
     return (
-        <boardContext.Provider value={value}>
-            <div onContextMenu={(e) => OnContextMenu(e)}>
+        <div>
+            <boardContext.Provider value={value}>
                 <div>{timer}</div>
-                <Yutfield />
-                <YutPlayersSection />
-            </div >
-        </boardContext.Provider >
-    )
+                {children}
+            </boardContext.Provider >
+        </div>
+    );
 }
 
-export default Yut;
+export default YutStore;

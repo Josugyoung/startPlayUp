@@ -8,7 +8,7 @@ import RockPaperScissors from "./Component/GameComponent/RockPaperScissors";
 import { BrowserRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import MineSearch from "JSC/Container/GameContainer/MineSearch";
-import Yut from 'JSC/Container/GameContainer/Yut';
+import Yut from 'JSC/Container/GameContainer/Yut/Yut';
 
 const GamePage = styled.div`
     display:flex;

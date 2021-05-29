@@ -1,4 +1,4 @@
-import { THROW_YUT, MOVE_HORSE, MOVE_FIRST_HORSE, boardContext } from 'JSC/Container/GameContainer/Yut';
+import { THROW_YUT, MOVE_HORSE, MOVE_FIRST_HORSE, UPDATE_GOAL, boardContext } from 'JSC/Container/GameContainer/Yut/YutStore';
 import React, { useContext, useState, memo, useEffect } from 'react';
 import styled from 'styled-components';
 import Horses from 'JSC/Component/GameComponent/Yut/Horses'
@@ -96,12 +96,22 @@ const App = () => {
             dispatch({ type: MOVE_HORSE, index });
         }
     }
-    const test = () => {
-        console.log("test");
+
+    useEffect(() => {
+        // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
+        // 골인지점에 있다면 점수 올리고 말 삭제
+        dispatch({ type: UPDATE_GOAL })
+    }, [horsePosition]);
+
+    const OnContextMenu = (e) => {
+        e.preventDefault();
+        console.log('우클!');
+        dispatch({ type: DESELECT_HORSE })
     }
+
     return (
         <div>
-            <GridContainer className="container">
+            <GridContainer onContextMenu={(e) => OnContextMenu(e)} className="container">
                 {gridTable.map((i, index) =>
                     <GridPlace key={index} index={i.index} row={i.column} column={i.row}>
                         <PlaceButton key={index} onClick={(e) => moveHorse(e, i.index)} color={changeItemColorHandler(i.index)}>{i.index}</PlaceButton>

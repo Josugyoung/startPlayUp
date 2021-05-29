@@ -1,4 +1,4 @@
-import { THROW_YUT, boardContext, SELECT_HORSE } from 'JSC/Container/GameContainer/Yut';
+import { THROW_YUT, boardContext, SELECT_HORSE } from 'JSC/Container/GameContainer/Yut/YutStore';
 import React, { useContext, useState, memo, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -30,7 +30,6 @@ const App = ({ horses, color, index }) => {
     const clickHorseHandler = (e, index) => {
         e.preventDefault();
         dispatch({ type: SELECT_HORSE, index })
-        console.log("[debug] : ", index, table[index]);
     }
     return (
         <div>
