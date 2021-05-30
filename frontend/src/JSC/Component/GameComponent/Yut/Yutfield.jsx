@@ -1,4 +1,4 @@
-import { THROW_YUT, MOVE_HORSE, MOVE_FIRST_HORSE, UPDATE_GOAL, boardContext } from 'JSC/Container/GameContainer/Yut/YutStore';
+import { DESELECT_HORSE, MOVE_HORSE, MOVE_FIRST_HORSE, UPDATE_GOAL, boardContext } from 'JSC/Container/GameContainer/Yut/YutStore';
 import React, { useContext, useState, memo, useEffect } from 'react';
 import styled from 'styled-components';
 import Horses from 'JSC/Component/GameComponent/Yut/Horses'
@@ -73,39 +73,24 @@ const App = () => {
         { index: 42, row: 16, column: 10 },
     ]
     const { table, selectHorse, yutData, playerData, horsePosition, placeToMove, dispatch } = useContext(boardContext);
-    // const [selectPlace, setSelectPlace] = useState("");
-    const clickHorseHandler = (index) => (e) => {
-        e.preventDefault();
-        dispatch({ type: SELECT_HORSE, index })
-        // console.log("[debug] : ", index, table[index]);
-    }
     const changeItemColorHandler = (index) => {
         // return placeToMove.map((i) => i.index).includes(index) ? 'yellow' : 'white'
         // change placeToMove index를 앞으로 빼서 key 값으로 바꿈.
         return Object.keys(placeToMove).includes(String(index)) ? 'yellow' : 'white'
 
     }
-    const moveHorse = (e, index) => {
+    const moveHorse = (e, index, player) => {
         e.preventDefault();
         if (selectHorse === 0) {
-            console.log("MOVE_FIRST_HORSE")
             dispatch({ type: MOVE_FIRST_HORSE, index })
         }
         else {
-            console.log("MOVE_HORSE")
             dispatch({ type: MOVE_HORSE, index });
         }
     }
 
-    useEffect(() => {
-        // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
-        // 골인지점에 있다면 점수 올리고 말 삭제
-        dispatch({ type: UPDATE_GOAL })
-    }, [horsePosition]);
-
     const OnContextMenu = (e) => {
         e.preventDefault();
-        console.log('우클!');
         dispatch({ type: DESELECT_HORSE })
     }
 

@@ -2,6 +2,8 @@ import { THROW_YUT, START_GAME, MOVE_HORSE_USE_YUTDATA, boardContext } from 'JSC
 import React, { useContext, useState, memo, useEffect } from 'react';
 import styled from 'styled-components';
 import Horses from 'JSC/Component/GameComponent/Yut/Horses'
+import { NEXT_TURN } from 'JSC/Container/GameContainer/Yut/YutStore';
+import HaltButton from './HaltButton';
 
 
 const StyleDiv = styled.div`
@@ -12,17 +14,17 @@ const StyleDiv = styled.div`
 `;
 
 const App = () => {
-    const { myThrowCount, yutData, playerData, dispatch } = useContext(boardContext);
-    // const [selectPlace, setSelectPlace] = useState("");
-    const test = () => {
-        dispatch({ type: START_GAME })
-    }
-
+    const { myThrowCount, yutData, playerData, nowTurn, dispatch, halted } = useContext(boardContext);
     return (
         <div>
-            <button onClick={test}>게임 시작</button>
-            <button onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</button>
-            <button onClick={() => console.log(yutData)}>윷 데이터</button>
+            <button onClick={() => dispatch({ type: START_GAME })}>게임 시작</button>
+            <HaltButton type={THROW_YUT} halted={halted} name={'윷 굴리기'} />
+            <HaltButton onClick={() => console.log(yutData)} halted={halted} name={'윷 데이터'} />
+            {/* <HaltButton onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</HaltButton>
+            <HaltButton onClick={() => console.log(yutData)}>윷 데이터</HaltButton> */}
+            <button onClick={() => dispatch({ type: NEXT_TURN })}>다음 턴</button>
+            <div>nowTurn : {nowTurn}</div>
+            <div>{playerData[nowTurn].nickname}</div>
             <StyleDiv>말이 갈 수 있는 수 :
                 {
                     yutData.map((i, index) => <button key={index} onClick={() => dispatch({ type: MOVE_HORSE_USE_YUTDATA })}> {i} </button>)
@@ -40,7 +42,7 @@ const App = () => {
                     <p />
                 </div>)}
             </div>
-        </div>
+        </div >
     )
 }
 export default memo(App);
