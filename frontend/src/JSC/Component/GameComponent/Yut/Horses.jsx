@@ -26,7 +26,7 @@ const StyledButton = styled.button`
 
 
 const App = ({ horses, color, index }) => {
-    const { dispatch, table } = useContext(boardContext);
+    const { dispatch } = useContext(boardContext);
     const clickHorseHandler = (e, index) => {
         e.preventDefault();
         dispatch({ type: SELECT_HORSE, index })
