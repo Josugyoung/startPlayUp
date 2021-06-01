@@ -91,7 +91,7 @@ const reducer = (state, action) => {
         case UPDATE_TIMER:
             return { ...state, timer: state.timer + 1 };
         case START_GAME:
-            return { ...initialState, myThrowCount: state.myThrowCount + 1, halted: false };
+            return { ...initialState, myThrowCount: state.myThrowCount + 10, halted: false };
         case RESUME_GAME:
             return { ...state, halted: true };
         case MY_TURN: {
@@ -123,7 +123,8 @@ const reducer = (state, action) => {
             arr.forEach((i) => {
                 // console.log("findPlace : ", findPlace(0, state.table, action.index, i))
                 // placeToMove.push({ yut: i, index: findPlace(0, state.table, action.index, i) })
-                placeToMove[findPlace(0, state.table, action.index, i)] = i
+                console.log("aaaa : ", state.horsePosition.hasOwnProperty(state.selectHorse) ? state.horsePosition[state.selectHorse].shortList : [])
+                placeToMove[findPlace(state.horsePosition.hasOwnProperty(state.selectHorse) ? state.horsePosition[state.selectHorse].shortList : [], state.table, action.index, i)] = i
             });
             console.log("말이 갈 수 있는 위치 : ", placeToMove);
             return { ...state, selectHorse: action.index, placeToMove };
@@ -191,7 +192,7 @@ const reducer = (state, action) => {
             }
             else {
                 const shortList = [...state.horsePosition[state.selectHorse].shortList];
-                if ([10, 20, 25, 30].includes(state.selectHorse)) {
+                if (state.selectHorse < action.index && [10, 20, 25, 30].includes(state.selectHorse)) {
                     console.log("state.selectHorse", state.selectHorse)
                     shortList.push(state.selectHorse);
                 }
@@ -256,11 +257,11 @@ const YutStore = ({ children }) => {
     // }, [yutData])
 
     // 타이머가 30 초가 넘었을 때 순서 넘기기
-    useEffect(() => {
-        if (timer > 30) {
-            dispatch({ type: NEXT_TURN })
-        }
-    }, [timer])
+    // useEffect(() => {
+    //     if (timer > 30) {
+    //         dispatch({ type: NEXT_TURN })
+    //     }
+    // }, [timer])
 
     // 순서 넘기기
     useEffect(() => {
