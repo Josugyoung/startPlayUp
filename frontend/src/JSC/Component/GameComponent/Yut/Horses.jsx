@@ -25,19 +25,17 @@ const StyledButton = styled.button`
 `;
 
 
-const App = ({ horses, color, index }) => {
+const App = ({ horses, player, index }) => {
     const { dispatch } = useContext(boardContext);
     const clickHorseHandler = (e, index) => {
         e.preventDefault();
         dispatch({ type: SELECT_HORSE, index })
     }
     return (
-        <div>
-            <div onClick={(e) => clickHorseHandler(e, index)} >
-                {[...Array(horses)].map((tp, index) =>
-                    <Horse key={index} color={color} index={index} />
-                )}
-            </div>
+        <div onClick={(e) => clickHorseHandler(e, index, player.nickname)} >
+            {[...Array(horses)].map((tp, index) =>
+                <Horse key={index} color={player.color} index={index} />
+            )}
         </div>
     )
 }

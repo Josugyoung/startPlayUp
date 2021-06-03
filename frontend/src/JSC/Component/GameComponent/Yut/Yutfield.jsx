@@ -38,8 +38,14 @@ const HorseButton = styled.button`
     left: 40px; */
 `;
 
+const YutDiv = styled.div`
+    margin: 10px 10px 40px 10px;
+`;
+
+
 const App = () => {
     const gridTable = [
+        { index: 0, row: 20, column: 20 },
         { index: 1, row: 20, column: 16 },
         { index: 2, row: 20, column: 12 },
         { index: 3, row: 20, column: 8 },
@@ -73,7 +79,7 @@ const App = () => {
     ]
     const { selectHorse, playerData, horsePosition, placeToMove, dispatch } = useContext(boardContext);
     const changeItemColorHandler = (index) => {
-        // return placeToMove.map((i) => i.index).includes(index) ? 'yellow' : 'white'
+        // return placeToMove.map((i) => index).includes(index) ? 'yellow' : 'white'
         // change placeToMove index를 앞으로 빼서 key 값으로 바꿈.
         return Object.keys(placeToMove).includes(String(index)) ? 'yellow' : 'white'
 
@@ -94,19 +100,19 @@ const App = () => {
     }
 
     return (
-        <div>
+        <YutDiv>
             <GridContainer onContextMenu={(e) => OnContextMenu(e)} className="container">
                 {gridTable.map((i, index) =>
-                    <GridPlace key={index} index={i.index} row={i.column} column={i.row}>
-                        <PlaceButton key={index} onClick={(e) => moveHorse(e, i.index)} color={changeItemColorHandler(i.index)}>{i.index}</PlaceButton>
-                        {horsePosition[i.index] !== undefined &&
-                            <Horses color={playerData[horsePosition[i.index]['player']]['color']} index={i.index} horses={horsePosition[i.index]['horses']}>
-                                {i.index}
+                    <GridPlace key={index} index={index} row={i.column} column={i.row}>
+                        <PlaceButton key={index} onClick={(e) => moveHorse(e, index)} color={changeItemColorHandler(index)}>{index}</PlaceButton>
+                        {horsePosition[index] !== undefined &&
+                            <Horses player={playerData[horsePosition[index]['player']]} index={index} horses={horsePosition[index]['horses']}>
+                                {index}
                             </Horses>}
                     </GridPlace>)
                 }
             </GridContainer >
-        </div>
+        </YutDiv>
     )
 }
 export default memo(App);

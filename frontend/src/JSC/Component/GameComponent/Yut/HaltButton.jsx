@@ -12,4 +12,4 @@ const App = ({ halted, name, type }) => {
         </button >
     )
 }
-export default App;
+export default memo(App);

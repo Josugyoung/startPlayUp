@@ -13,8 +13,24 @@ const StyleDiv = styled.div`
     margin:10px;
 `;
 
+const PlayerSection = styled.div`
+    display:flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width:500px;
+    margin:20px;
+
+`;
+
+const Player = styled.div`
+    padding:10px;
+    margin:0px;
+`;
+
 const App = () => {
-    const { myThrowCount, yutData, playerData, nowTurn, dispatch, halted } = useContext(boardContext);
+    const { myThrowCount, yutData, playerData, dispatch } = useContext(boardContext);
+    const halted = false;
+
     return (
         <div>
             <button onClick={() => dispatch({ type: START_GAME })}>게임 시작</button>
@@ -23,25 +39,23 @@ const App = () => {
             {/* <HaltButton onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</HaltButton>
             <HaltButton onClick={() => console.log(yutData)}>윷 데이터</HaltButton> */}
             <button onClick={() => dispatch({ type: NEXT_TURN })}>다음 턴</button>
-            <div>nowTurn : {nowTurn}</div>
-            <div>{playerData[nowTurn].nickname}</div>
             <StyleDiv>말이 갈 수 있는 수 :
                 {
                     yutData.map((i, index) => <button key={index} onClick={() => dispatch({ type: MOVE_HORSE_USE_YUTDATA })}> {i} </button>)
                 }
             </StyleDiv>
             <div>윷 던질 수 있는 횟수 : {myThrowCount}</div>
-            <div>
-                {playerData.map((i, index) => <div key={index}>
+            <PlayerSection>
+                {playerData.map((i, index) => <Player key={index}>
                     <div>닉네임 : {i.nickname}</div>
                     <div style={{ "height": "60px" }} >
                         말의 갯수 :
-                        <Horses color={i.color} index={0} horses={i.horses} />
+                        <Horses player={i} index={0} horses={i.horses} />
                     </div>
                     <div>얻은 점수 : {i.goal}</div>
                     <p />
-                </div>)}
-            </div>
+                </Player>)}
+            </PlayerSection>
         </div >
     )
 }

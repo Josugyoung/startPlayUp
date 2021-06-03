@@ -37,6 +37,7 @@ const initialState = {
         { nickname: '장석찬', color: 'red', horses: 4, goal: 0 },
         { nickname: '정진', color: 'orange', horses: 4, goal: 0 },
         { nickname: '이종찬', color: 'blue', horses: 4, goal: 0 },
+        { nickname: '조석영', color: 'green', horses: 4, goal: 0 },
         // { nickname: 'player3', color: 'yellow' },
         // { nickname: 'player4', color: 'green' },
     ], // 몇번 칸에 누구 말이 몇개 있는지 알 수 있음.
@@ -81,6 +82,8 @@ const reducer = (state, action) => {
     let yutData;
     // let horsePosition;
     let goal;
+
+
     switch (action.type) {
         case UPDATE_TIMER:
             return { ...state, timer: state.timer + 1 };
@@ -140,22 +143,33 @@ const reducer = (state, action) => {
             // let nowTurn = horsePosition[action.index]['player']
             const nowTurn = state.nowTurn;
             const playerData = [...state.playerData]
+            let myThrowCount = state.myThrowCount;
             playerData[nowTurn] = { ...playerData[nowTurn], horses: playerData[nowTurn].horses - 1 }
-
             if (state.horsePosition.hasOwnProperty(String(action.index))) {
-                // 겹치기
-                horsePosition[action.index] = {
-                    ...state.horsePosition[action.index],
-                    'horses': state.horsePosition[action.index].horses + 1
-                };
+                if (nowTurn === state.horsePosition[action.index].player)
+                    // 내 말이 있을 때
+                    horsePosition[action.index] = {
+                        ...state.horsePosition[action.index],
+                        'horses': state.horsePosition[action.index].horses + 1
+                    };
+                else {
+                    // 상대 말이 있을 때
+                    let deadHorseOwner = horsePosition[action.index].player;
+                    playerData[deadHorseOwner] = { ...playerData[deadHorseOwner], horses: playerData[deadHorseOwner].horses + horsePosition[action.index].horses }
+
+                    myThrowCount += 1;
+
+                    horsePosition[action.index] = { player: nowTurn, horses: 1, placeList: [0] }
+                }
             }
             else {
-                horsePosition[action.index] = { player: nowTurn, horses: 1, placeList: [] }
+                // 아무것도 없었을 때
+                horsePosition[action.index] = { player: nowTurn, horses: 1, placeList: [0] }
             }
 
             // 만약에 먹으면 먹힌 사람 말 갯수 올려주고 
             // 내거라면 위치에 + 1 해주고
-            return { ...state, yutData, playerData, horsePosition, selectHorse: undefined, placeToMove: {} };
+            return { ...state, yutData, playerData, myThrowCount, horsePosition, selectHorse: undefined, placeToMove: {} };
         }
 
         case MOVE_HORSE: {
@@ -170,49 +184,55 @@ const reducer = (state, action) => {
             // 사용할 윷 데이터가 들어오면 해당 윷 데이터를 삭제
             // yutData = deleteYutDataOfOne(state.yutData, state.placeToMove, action.index); // 오류나는데 이유 확인 해야함. 
             yutData = [...state.yutData];
+            console.log("yutData place to move", state.yutData, state.placeToMove)
             yutData.splice(yutData.indexOf(state.placeToMove[action.index]), 1);
 
 
             // 말 이동 관련 코드
             const horsePosition = { ...state.horsePosition };
-            if (horsePosition.hasOwnProperty(String(action.index))) {
-                // 겹치기 
-                // 겹칠때 플레이어도 비교해야것는데?
-                horsePosition[action.index] = {
-                    ...state.horsePosition[action.index],
-                    'horses':
-                        state.horsePosition[action.index].horses +
-                        state.horsePosition[state.selectHorse].horses
-                };
+            const nowTurn = state.nowTurn;
+            let myThrowCount = state.myThrowCount;
+
+            const playerData = [...state.playerData]
+            if (state.horsePosition.hasOwnProperty(String(action.index))) {
+                if (nowTurn === state.horsePosition[action.index].player)
+                    // 내 말이 있을 때
+                    horsePosition[action.index] = {
+                        ...state.horsePosition[action.index],
+                        'horses': state.horsePosition[action.index].horses + 1
+                    };
+                else {
+                    // 상대 말이 있을 때
+                    let deadHorseOwner = horsePosition[action.index].player;
+                    playerData[deadHorseOwner] = { ...playerData[deadHorseOwner], horses: playerData[deadHorseOwner].horses + horsePosition[action.index].horses }
+
+                    myThrowCount += 1;
+
+                    horsePosition[action.index] = { player: nowTurn, horses: 1, placeList: [0] }
+                }
             }
             else {
+                // 아무것도 없었을 때
                 const placeList = [...state.horsePosition[state.selectHorse].placeList];
-                // if (state.selectHorse < action.index && [10, 20, 25, 30].includes(state.selectHorse)) {
                 placeList.push(state.selectHorse);
-                // }
-
                 horsePosition[action.index] = { ...horsePosition[state.selectHorse], placeList };
             }
             delete horsePosition[state.selectHorse]
 
-            return { ...state, yutData, horsePosition, selectHorse: undefined, placeToMove: {} };
+            return { ...state, yutData, playerData, horsePosition, myThrowCount, selectHorse: undefined, placeToMove: {} };
         }
         case UPDATE_GOAL: {
             // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
             // 골인지점에 있다면 점수 올리고 말 삭제
-            if (state.horsePosition.hasOwnProperty(30)) {
-                const playerData = [...state.playerData]
-                const horsePosition = { ...state.horsePosition };
-                const player = horsePosition[30].player;
-                goal = playerData[player].goal // 플레이어 데이터의 goal과 
-                    + horsePosition[30].horses // 현재 골인지점에 있는 말들을 더함.
-                delete horsePosition[30]; // 골인 지점 말 삭제
-                playerData[player] = { ...playerData[player], goal }
-                return { ...state, horsePosition, playerData }
-            }
-            else {
-                return { ...state }
-            }
+            const playerData = [...state.playerData]
+            const horsePosition = { ...state.horsePosition };
+            const player = horsePosition[30].player;
+            goal = playerData[player].goal // 플레이어 데이터의 goal과 
+                + horsePosition[30].horses // 현재 골인지점에 있는 말들을 더함.
+            delete horsePosition[30]; // 골인 지점 말 삭제
+            playerData[player] = { ...playerData[player], goal }
+            return { ...state, horsePosition, playerData }
+
         }
         case DESELECT_HORSE:
             return { ...state, selectHorse: undefined, placeToMove: {} };
@@ -243,16 +263,12 @@ const YutStore = ({ children }) => {
         }
     }, [halted])
 
-    // useEffect(() => {
-    //     console.log("debug state.yutData : ", state.yutData);
-    // }, [yutData])
-
     // 타이머가 30 초가 넘었을 때 순서 넘기기
-    // useEffect(() => {
-    //     if (timer > 30) {
-    //         dispatch({ type: NEXT_TURN })
-    //     }
-    // }, [timer])
+    useEffect(() => {
+        if (timer > 30) {
+            dispatch({ type: NEXT_TURN })
+        }
+    }, [timer])
 
     // 순서 넘기기
     useEffect(() => {
@@ -264,7 +280,9 @@ const YutStore = ({ children }) => {
     useEffect(() => {
         // 말 위치 데이터가 변경이 되었다면 골인지점 에 있는 상태인지 확인,
         // 골인지점에 있다면 점수 올리고 말 삭제
-        dispatch({ type: UPDATE_GOAL })
+        if (state.horsePosition.hasOwnProperty(30)) {
+            dispatch({ type: UPDATE_GOAL })
+        }
     }, [horsePosition]);
 
     useEffect(() => {
@@ -277,17 +295,23 @@ const YutStore = ({ children }) => {
         console.log("hp : ", horsePosition);
     }, [horsePosition])
 
-    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, halted, dispatch, horsePosition, myThrowCount, nowTurn, myTurn }), [selectHorse, myThrowCount, placeToMove, horsePosition, playerData, nowTurn, myTurn, yutData, halted]);
-
+    const value = useMemo(() => ({ playerData, yutData, placeToMove, selectHorse, halted, horsePosition, myThrowCount, nowTurn, myTurn, dispatch }), [selectHorse, myThrowCount, placeToMove, horsePosition, playerData, yutData, nowTurn, halted]);
+    // playerData 플레이어 데이터
+    // yutData yut을 던져 나온 결과 리스트
+    // placeToMove 움직일 수 있는 위치
+    // selectHorse 현재 선택한 말
+    // halted 
 
     return (
         <div>
+            <div>{timer}</div>
+            <div>nowTurn : {nowTurn}</div>
+            <div>{playerData[nowTurn].nickname}</div>
             <boardContext.Provider value={value}>
-                <div>{timer}</div>
                 {children}
             </boardContext.Provider >
         </div>
     );
 }
 
-export default YutStore;
+export default memo(YutStore);

@@ -5,7 +5,7 @@ const table = {
     10: [[9], 26, 27, 23, 28, 29, 20, 30, 30, 30, 30],
     23: [[22, 27], 28, 29, 20, 30, 30, 30, 30],
     15: [[14, 25]],
-    20: [[19, 29], 30],
+    20: [[19, 29]],
 };
 
 const findDataInObject = (table, index) => {
@@ -31,6 +31,8 @@ const findPlace = (index, add) => {
                 break;
             case 23:
                 result = table[index][add]
+                break;
+            default:
                 break;
         }
     }
@@ -58,6 +60,8 @@ const findBackdoPlace = (placeList, index) => {
                 break;
             case 20:
                 result = table[index][0][lastPlace < 20 ? 0 : 1]
+                break;
+            default:
                 break;
         }
     }
