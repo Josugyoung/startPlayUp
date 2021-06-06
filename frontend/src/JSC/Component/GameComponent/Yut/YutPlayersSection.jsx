@@ -28,16 +28,13 @@ const Player = styled.div`
 `;
 
 const App = () => {
-    const { myThrowCount, yutData, playerData, dispatch } = useContext(boardContext);
-    const halted = false;
+    const { myThrowCount, yutData, playerData, halted, dispatch } = useContext(boardContext);
+    // const halted = false;
 
     return (
         <div>
             <button onClick={() => dispatch({ type: START_GAME })}>게임 시작</button>
-            <HaltButton type={THROW_YUT} halted={halted} name={'윷 굴리기'} />
-            <HaltButton onClick={() => console.log(yutData)} halted={halted} name={'윷 데이터'} />
-            {/* <HaltButton onClick={() => dispatch({ type: THROW_YUT })}>윷 굴리기</HaltButton>
-            <HaltButton onClick={() => console.log(yutData)}>윷 데이터</HaltButton> */}
+            <HaltButton dispatch={dispatch} type={THROW_YUT} halted={halted} name={'윷 굴리기'} />
             <button onClick={() => dispatch({ type: NEXT_TURN })}>다음 턴</button>
             <StyleDiv>말이 갈 수 있는 수 :
                 {

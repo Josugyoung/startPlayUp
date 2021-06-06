@@ -72,6 +72,31 @@ const randomYut = () => {
     return result === 1 && arr[0] === 1 ? CODE.BACK_DO : result;
 }
 
+
+const shuffle = (array) => {
+    // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+    var currentIndex = array.length, randomIndex;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+const findMyTurn = (array, value) => {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i].nickname === value) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 const reducer = (state, action) => {
     action.type !== UPDATE_TIMER && console.log("action start : ", action.type)
     // let horsePosition;
@@ -82,9 +107,8 @@ const reducer = (state, action) => {
 
     switch (action.type) {
         case GET_DATA_FROM_PEER: {
-            // const { playerData, myThrowCount, halted } = action;
-            // return { ...initialState, playerData, myThrowCount, halted }
-            return { ...state, ...action.data };
+            const myTurn = findMyTurn(action.data.playerData, nickname);
+            return { ...state, ...action.data, myTurn };
         }
         case UPDATE_TIMER:
             return { ...state, timer: state.timer + 1 };
@@ -95,8 +119,10 @@ const reducer = (state, action) => {
                 playerData.push({ nickname: i.nickname, color: colorList[index], horses: 4, goal: 0 });
             });
             console.log(playerData);
+            shuffle(playerData);
 
-            const result = { ...initialState, playerData, myThrowCount: state.myThrowCount + 10, halted: false };
+            const myTurn = findMyTurn(playerData, nickname);
+            const result = { ...initialState, playerData, myTurn, myThrowCount: 1, halted: false };
 
             sendDataToPeers(GAME, { nickname, peers, game: YUT, data: result })
 
@@ -229,9 +255,8 @@ const reducer = (state, action) => {
                 placeList.push(state.selectHorse);
                 console.log('placeList 추가');
             }
-
+            const selectHorseData = state.horsePosition[state.selectHorse];
             if (state.horsePosition.hasOwnProperty(String(action.index))) {
-                const selectHorseData = state.horsePosition[state.selectHorse];
                 const actionIndexHorseData = state.horsePosition[action.index];
                 if (selectHorseData.player === actionIndexHorseData.player)
                     // 내 말이 있을 때
@@ -284,11 +309,13 @@ const reducer = (state, action) => {
         }
         case NEXT_TURN:
             // send next user
-            const nowTurn = state.nowTurn === state.playerData.length - 1 ? 0 : state.nowTurn + 1;
+            if (state.nowTurn !== state.myTurn) {
+                const nowTurn = state.nowTurn === state.playerData.length - 1 ? 0 : state.nowTurn + 1;
 
-            sendDataToPeers(GAME, { nickname, peers, game: YUT, data: { ...state, placeToMove: {}, myThrowCount: 1, yutData: [], nowTurn, timer: 0, halted: true } });
+                sendDataToPeers(GAME, { nickname, peers, game: YUT, data: { ...state, placeToMove: {}, myThrowCount: 1, yutData: [], nowTurn, timer: 0 } });
 
-            return { ...state, placeToMove: {}, myThrowCount: 1, yutData: [], nowTurn, timer: 0, halted: true };
+                return { ...state, placeToMove: {}, myThrowCount: 1, yutData: [], nowTurn, timer: 0 };
+            }
         default:
             return state;
     }
