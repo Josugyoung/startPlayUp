@@ -1,5 +1,5 @@
-export const sendDataToPeers = (type, { nickname, data, peers }) => {
-    const js = JSON.stringify({ type, nickname, data })
+export const sendDataToPeers = (type, { game, nickname, data, peers }) => {
+    const js = JSON.stringify({ type, game, nickname, data })
     let success = false;
     try { // 
         peers === undefined || peers.forEach(p => {

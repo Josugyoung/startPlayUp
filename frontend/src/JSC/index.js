@@ -31,8 +31,8 @@ function app() {
         <BrowserRouter>
 
             {/* 원래 코드 주석 처리 ( 로그인 표시 X) */}
-            {/* <Route path="/" component={GlobalContainer} /> */}
-            {/* <Route exact path="/" component={LoginPageContainer} />
+            <Route path="/" component={GlobalContainer} />
+            <Route exact path="/" component={LoginPageContainer} />
             {isAuthenticated && <Route exact path="/main" component={TemporaryMain} />}
             {isAuthenticated && <Route exact path="/RockPaperScissors" render={() => <GamePage>
                 <RockPaperScissors />
@@ -44,10 +44,10 @@ function app() {
             {isAuthenticated && <Route exact path="/Yut" render={() => <GamePage>
                 <Yut />
                 <ChatComponent />
-            </GamePage>} />} */}
+            </GamePage>} />}
 
 
-            {<Route path="/" component={TemporaryMain} />}
+            {/* {<Route path="/" component={TemporaryMain} />}
             {<Route exact path="/RockPaperScissors" render={() => <GamePage>
                 <RockPaperScissors />
                 <ChatComponent />
@@ -58,7 +58,7 @@ function app() {
             {<Route exact path="/Yut" render={() => <GamePage>
                 <Yut />
                 <ChatComponent />
-            </GamePage>} />}
+            </GamePage>} />} */}
         </BrowserRouter>
     );
 }

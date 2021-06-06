@@ -1,4 +1,10 @@
-export const PEER_ROCK_PAPER_SCISSORS = 'ROCK_PAPER_SCISSORS';
+
+// GAMES
+export const GAME = 'GAME';
+export const ROCK_PAPER_SCISSORS = 'ROCK_PAPER_SCISSORS';
+export const MINE_SEARCH = 'MINE_SEARCH';
+export const YUT = 'YUT';
+
+//CHAT
 export const PEER_CHAT = 'PEER_CHAT';
-export const PEER_MINE_SEARCH = 'PEER_MINE_SEARCH';
 

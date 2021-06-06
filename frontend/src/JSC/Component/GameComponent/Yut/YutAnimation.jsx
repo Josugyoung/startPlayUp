@@ -89,7 +89,7 @@ const FaceText = styled.div`
 
 const YutAnimation = () => {
 	const list = [0, 1, 2, 3];
-	const [test, setTest] = useState(false);
+	const [test, setTest] = useState(true);
 
 	return (
 		<Background>

@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, createContext, useMemo, memo, useContext 
 import Table from 'JSC/Component/GameComponent/MineSearch/Table';
 import Form from 'JSC/Component/GameComponent/MineSearch/Form';
 import styled from 'styled-components';
-import { PEER_MINE_SEARCH } from 'JSC/Constants/peerDataTypes';
+import { GAME, MINE_SEARCH } from 'JSC/Constants/peerDataTypes';
 import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
 import { sendDataToPeers } from 'JSC/Common/peerModule/sendToPeers';
 
@@ -112,8 +112,8 @@ const reducer = (state, action) => {
                 halted: false,
                 openedCount: 0,
             }
-            // sendDataToPeers(PEER_MINE_SEARCH, { nickname: action.nickname, data: { tableData: tableObject.tableData, data: tableObject.data, halted: tableObject.halted }, peers: action.peers });
-            sendDataToPeers(PEER_MINE_SEARCH, { nickname, data: { tableData: tableObject.tableData, data: tableObject.data, halted: tableObject.halted }, peers });
+            // sendDataToPeers(GAME_MINE_SEARCH, { nickname: action.nickname, data: { tableData: tableObject.tableData, data: tableObject.data, halted: tableObject.halted }, peers: action.peers });
+            sendDataToPeers(GAME, { game: MINE_SEARCH, nickname, data: { tableData: tableObject.tableData, data: tableObject.data, halted: tableObject.halted }, peers });
 
             return tableObject
         }
@@ -201,7 +201,8 @@ const reducer = (state, action) => {
                 result: result,
             }
 
-            sendDataToPeers(PEER_MINE_SEARCH, {
+            sendDataToPeers(GAME, {
+                game: MINE_SEARCH,
                 nickname,
                 data,
                 peers
@@ -307,7 +308,7 @@ const MineSearch = (props,) => {
     }, [halted])
 
     useEffect(() => {
-        if (peerData.type === PEER_MINE_SEARCH) {
+        if (peerData.type === GAME && peerData.game === MINE_SEARCH) {
             const { tableData, data, halted } = peerData.data;
             dispatch({ type: "GetDataFromPeer", tableData, data, halted })
         }

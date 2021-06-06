@@ -79,8 +79,6 @@ const App = () => {
     ]
     const { selectHorse, playerData, horsePosition, placeToMove, dispatch } = useContext(boardContext);
     const changeItemColorHandler = (index) => {
-        // return placeToMove.map((i) => index).includes(index) ? 'yellow' : 'white'
-        // change placeToMove index를 앞으로 빼서 key 값으로 바꿈.
         return Object.keys(placeToMove).includes(String(index)) ? 'yellow' : 'white'
 
     }

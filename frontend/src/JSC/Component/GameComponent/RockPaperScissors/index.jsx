@@ -4,7 +4,7 @@ import scissors from "JSC/image/가위.jpg"
 import rock from 'JSC/image/바위.jpg'
 import paper from 'JSC/image/보.jpg'
 import styled from "styled-components"
-import { PEER_ROCK_PAPER_SCISSORS } from "JSC/Constants/peerDataTypes";
+import { GAME, ROCK_PAPER_SCISSORS } from "JSC/Constants/peerDataTypes";
 import { sendDataToPeers } from 'JSC/Common/peerModule/sendToPeers'
 
 const ImageButton = styled.button`
@@ -36,7 +36,7 @@ const App = () => {
     const { peers } = useContext(PeersContext);
 
     useEffect(() => {
-        if (peerData.type === PEER_ROCK_PAPER_SCISSORS) {
+        if (peerData.type === GAME && peerData.game === ROCK_PAPER_SCISSORS) {
             setEnemyData(peerData.data);
         }
     }, [peerData])
@@ -53,7 +53,7 @@ const App = () => {
         else {
             tmp = "paper"
         }
-        success = sendDataToPeers(PEER_ROCK_PAPER_SCISSORS, { nickname: localStorage.getItem('nickname'), data: tmp, peers });
+        success = sendDataToPeers(GAME, { game: ROCK_PAPER_SCISSORS, nickname: localStorage.getItem('nickname'), data: tmp, peers });
         success === true && peers.length && setSelectData(tmp);
     }
     const PrintResult = () => {
