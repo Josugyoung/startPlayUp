@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect, createContext, useMemo, memo, useContext } from 'react';
 import styled from 'styled-components';
 import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
-import { checkPlace, checkSelectState, checkEmptySelectHorse, checkHavePlaceToMove } from './YutFunctionModule.mjs'
+import { checkPlace, checkSelectState, checkEmptySelectHorse, checkHavePlaceToMove } from './YutFunctionModule.js'
 import { sendDataToPeers } from 'JSC/Common/peerModule/sendToPeers/index.js';
 import { GAME, YUT } from 'JSC/Constants/peerDataTypes.js';
 

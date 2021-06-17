@@ -1,5 +1,3 @@
-// import { YUT_RESULT_TYPE } from './YutStore'
-
 const YUT_RESULT_TYPE = {
     BACK_DO: 0,
     DO: 1,
@@ -47,7 +45,7 @@ const findPlace = (index, add) => {
 const findBackdoPlace = (placeList, index) => {
     let result = [];
     if ([23, 15, 20].includes(index)) {
-        console.log("placeList : ", placeList)
+        // console.log("placeList : ", placeList)
         // const lastPlace = placeList[placeList.length - 1];
         // const lastPlace = placeList.filter((i) => ![15, 23, 24, 25, 28, 29, 20].includes(i)).pop();
         // switch (index) {
