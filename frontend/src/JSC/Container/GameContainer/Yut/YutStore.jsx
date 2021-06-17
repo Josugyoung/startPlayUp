@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect, createContext, useMemo, memo, useContext } from 'react';
 import styled from 'styled-components';
 import { PeerDataContext, PeersContext, UserContext } from 'JSC/store';
-import { checkPlace, checkSelectState, checkEmptySelectHorse, checkHavePlaceToMove } from './YutFunctionModule.js'
+import { checkPlace, checkSelectState, checkEmptySelectHorse, checkHavePlaceToMove } from './YutFunctionModule.mjs'
 import { sendDataToPeers } from 'JSC/Common/peerModule/sendToPeers/index.js';
 import { GAME, YUT } from 'JSC/Constants/peerDataTypes.js';
 
@@ -117,7 +117,7 @@ const reducer = (state, action) => {
         case START_GAME: {
             const colorList = ['orange', 'blue', 'green']
             const playerData = [{ nickname, color: 'red', horses: 4, goal: 0 }];
-            peers.forEach((i, index) => {
+            peers.slice(0, 3).forEach((i, index) => {
                 playerData.push({ nickname: i.nickname, color: colorList[index], horses: 4, goal: 0 });
             });
             console.log(playerData);
@@ -179,7 +179,7 @@ const reducer = (state, action) => {
             });
             console.log("말이 갈 수 있는 위치 : ", placeToMove);
 
-            sendDataToPeers(GAME, { nickname, peers, game: YUT, data: { ...state, selectHorse: action.index, placeToMove } });
+            //sendDataToPeers(GAME, { nickname, peers, game: YUT, data: { ...state, selectHorse: action.index, placeToMove } });
 
             return { ...state, selectHorse: action.index, placeToMove };
 
@@ -331,35 +331,35 @@ const YutStore = ({ children }) => {
     const { peerData } = useContext(PeerDataContext);
     const { playerData, placeToMove, myThrowCount, selectHorse, winner, yutData, halted, timer, nowTurn, myTurn, horsePosition } = state;
 
-    // 타이머 돌리기
-    // useEffect(() => {
-    //     let timer;
-    //     if (halted === false) {
-    //         timer = setInterval(() => {
-    //             dispatch({ type: UPDATE_TIMER })
-    //         }, 1000);
-    //     }
-    //     return () => {
-    //         clearInterval(timer);
-    //     }
-    // }, [halted])
-
-    // // 타이머가 30 초가 넘었을 때 순서 넘기기
-    // useEffect(() => {
-    //     if (timer > 30) {
-    //         dispatch({ type: NEXT_TURN })
-    //     }
-    // }, [timer])
-
-
-
+    // // 타이머 돌리기
     useEffect(() => {
-        console.log("useEffect MY_TURN", nowTurn === myTurn, nowTurn, myTurn);
-        if (nowTurn === myTurn) {
-            console.log("MY_TURN");
-            dispatch({ type: MY_TURN });
+        let timer;
+        if (halted === false) {
+            timer = setInterval(() => {
+                dispatch({ type: UPDATE_TIMER })
+            }, 1000);
         }
-    }, [nowTurn])
+        return () => {
+            clearInterval(timer);
+        }
+    }, [halted])
+
+    // 타이머가 30 초가 넘었을 때 순서 넘기기
+    useEffect(() => {
+        if (timer > 10) {
+            dispatch({ type: NEXT_TURN })
+        }
+    }, [timer])
+
+
+
+    // useEffect(() => {
+    //     console.log("useEffect MY_TURN", nowTurn === myTurn, nowTurn, myTurn);
+    //     if (nowTurn === myTurn) {
+    //         console.log("MY_TURN");
+    //         dispatch({ type: MY_TURN });
+    //     }
+    // }, [nowTurn])
 
     useEffect(() => {
         if (peerData.type === GAME && peerData.game === YUT) {
@@ -369,11 +369,11 @@ const YutStore = ({ children }) => {
     }, [peerData])
 
     // 순서 넘기기
-    useEffect(() => {
-        if (yutData.length === 0 && myThrowCount === 0) {
-            dispatch({ type: NEXT_TURN })
-        }
-    }, [yutData, myThrowCount])
+    // useEffect(() => {
+    //     if (yutData.length === 0 && myThrowCount === 0) {
+    //         dispatch({ type: NEXT_TURN })
+    //     }
+    // }, [yutData, myThrowCount])
 
 
 

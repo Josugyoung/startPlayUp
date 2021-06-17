@@ -30,3 +30,6 @@ backend/node_modules
 backend/testf
 backend/testServerFile
 .env
+
+
+tests

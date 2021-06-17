@@ -1,4 +1,13 @@
-import { YUT_RESULT_TYPE } from './YutStore'
+// import { YUT_RESULT_TYPE } from './YutStore'
+
+const YUT_RESULT_TYPE = {
+    BACK_DO: 0,
+    DO: 1,
+    GAE: 2,
+    GIRL: 3,
+    YUT: 4,
+    MO: 5,
+}
 
 const table = {
     5: [[5], 21, 22, 23, 24, 25, 15, 16, 17, 18, 19],
@@ -78,7 +87,7 @@ const findBackdoPlace = (placeList, index) => {
 }
 
 export const checkPlace = (placeList, index, add) => {
-    console.log("checkPlace");
+    // console.log("checkPlace");
     if (add !== YUT_RESULT_TYPE.BACK_DO) {
         return findPlace(index, add);
     }
@@ -89,7 +98,7 @@ export const checkPlace = (placeList, index, add) => {
 
 export const checkSelectState = (selectHorse, placeToMove, index) => {
     if (selectHorse === undefined || !placeToMove.hasOwnProperty(String(index))) {
-        console.log("out of MOVE_HORSE");
+        // console.log("out of MOVE_HORSE");
         return true;
     }
     return false;
@@ -118,3 +127,4 @@ export const checkMyTurn = (player, turn) => {
     }
     return false;
 }
+

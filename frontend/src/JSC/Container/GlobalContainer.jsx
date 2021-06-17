@@ -1,5 +1,7 @@
 import React, { memo } from "react";
 import { createGlobalStyle } from "styled-components";
+import Footer from '../Component/WebComponent/WebFrame/webFooter';
+import Header from '../Component/WebComponent/WebFrame/webHeader';
 import reset from "styled-reset";
 import thunderstorm from "../image/thunderstorm.jpg";
 
@@ -25,7 +27,11 @@ const GlobalStyles = createGlobalStyle`
 function ChatContainer() {
   console.log("debug ChatContainer rerender");
   return (
-    <GlobalStyles image={thunderstorm} />
+    <>
+      <Header />
+      <GlobalStyles image={thunderstorm} />
+      <Footer />
+    </>
   );
 }
 

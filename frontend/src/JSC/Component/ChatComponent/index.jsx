@@ -96,8 +96,8 @@ function Index({ backgroundColor, height, width, ...props }) {
     const peersDestory = (peers, voicePeers) => {
         peers.forEach((peer) => {
             console.log("return useEffect peer destroy")
-            // peer.peer.destroy()
-            peer.peer.on('close', () => console.log("delete"));
+            peer.peer.destroy()
+            // peer.peer.on('close', () => console.log("delete"));
         });
         setPeerData([]);
 
@@ -128,6 +128,7 @@ function Index({ backgroundColor, height, width, ...props }) {
         // }
         return () => {
             peersDestory(peers, voicePeers)
+            socketRef.current.disconnect();
         };
     }, []);
 
@@ -161,4 +162,4 @@ function Index({ backgroundColor, height, width, ...props }) {
     );
 }
 
-export default memo(Index);
+export default Index;
