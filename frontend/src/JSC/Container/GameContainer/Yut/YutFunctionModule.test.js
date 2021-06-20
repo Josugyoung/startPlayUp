@@ -18,7 +18,7 @@ describe("side place test", () => {
     const list = [[9], [26], [27], [23], [28], [29]]
     Object.values(YUT_RESULT_TYPE).forEach((i, index) => {
         test(`checkPlace | nowPlace add ${i}`, () => {
-            expect(checkPlace([], nowPlace, i)).toEqual(list[index]);
+            expect(checkPlace([], nowPlace, i)).toStrictEqual(list[index]);
         });
     });
 })
@@ -33,7 +33,7 @@ describe("edge(15,23,20)) place test", () => {
     for (let k = 0; k < nowPlace.length; k++) {
         Object.values(YUT_RESULT_TYPE).forEach((i, index) => {
             test(`checkPlace | nowPlace add ${i}`, () => {
-                expect(checkPlace([], nowPlace[k], i)).toEqual(list[k][index]);
+                expect(checkPlace([], nowPlace[k], i)).toStrictEqual(list[k][index]);
             });
         });
     }
